@@ -1,17 +1,10 @@
 #pragma once
 
+#include <sigma/attributes.h>
 #include <sigma/qol.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#if defined(__GNUC__) || defined(__clang__)
-#define SIGMA_NODISCARD [[nodiscard]]
-#define SIGMA_PRINTF(fmt, args) __attribute__((format(printf, fmt, args)))
-#else
-#define SIGMA_NODISCARD
-#define SIGMA_PRINTF(fmt, args)
-#endif
 
 typedef struct s_list {
   void *content;
@@ -70,11 +63,14 @@ SIGMA_NODISCARD char *ft_strmapi(const char *text,
                                  char (*fn)(unsigned int, char));
 int ft_strncmp(const char *left, const char *right, usize size);
 SIGMA_NODISCARD char *ft_strnstr(const char *text, const char *needle,
-                                usize size);
+                                 usize size);
 SIGMA_NODISCARD char *ft_strrchr(const char *text, int c);
 SIGMA_NODISCARD char *ft_strtrim(const char *text, const char *set);
 SIGMA_NODISCARD char *ft_substr(const char *text, unsigned int start,
-                               usize size);
+                                usize size);
 int ft_tolower(int c);
 int ft_toupper(int c);
 int ft_printf(const char *format, ...) SIGMA_PRINTF(1, 2);
+
+#include <sigma/hash_map.h>
+#include <sigma/reader.h>

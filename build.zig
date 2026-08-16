@@ -49,6 +49,7 @@ pub fn build(b: *std.Build) void {
             .imports = &.{.{ .name = "c", .module = translated.createModule() }},
         }),
     });
+    tests.use_llvm = true;
     configureC(b, tests.root_module, sigma_malloc);
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 }
@@ -67,12 +68,27 @@ fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build
 const source_files = [_][]const u8{
     "char/ft_is_things.c",
     "char/ft_to_upper_to_lower.c",
+    "collections/hash_map.c",
     "conversion/ft_itoa.c",
     "conversion/parse_i32.c",
     "io/ft_putchar_fd.c",
     "io/ft_putendl_fd.c",
     "io/ft_putnbr_fd.c",
     "io/ft_putstr_fd.c",
+    "io/printf/conversion/integer_digits.c",
+    "io/printf/conversion/print_char.c",
+    "io/printf/conversion/print_hex.c",
+    "io/printf/conversion/print_int.c",
+    "io/printf/conversion/print_percent.c",
+    "io/printf/conversion/print_pointer.c",
+    "io/printf/conversion/print_string.c",
+    "io/printf/conversion/print_uint.c",
+    "io/printf/core/printf.c",
+    "io/printf/core/printf_dispatch.c",
+    "io/printf/format/parse.c",
+    "io/printf/format/parse_utils.c",
+    "io/printf/support/writer.c",
+    "io/reader.c",
     "list/ft_lstadd_back.c",
     "list/ft_lstadd_front.c",
     "list/ft_lstclear.c",

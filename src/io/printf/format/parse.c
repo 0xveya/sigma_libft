@@ -1,0 +1,68 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                       :::      ::::::::    */
+/*   parse.c                                           :+:      :+:    :+:    */
+/*                                                   +:+ +:+         +:+      */
+/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
+/*                                               +#+#+#+#+#+   +#+            */
+/*   Created: 2026/04/26 16:51:42 by sfurst           #+#    #+#              */
+/*   Updated: 2026/04/26 18:28:06 by sfurst          ###   ########.fr        */
+/*                                                                            */
+/* ************************************************************************** */
+
+/* sigma:begin
+name: libft.io.printf.format.parse
+provides: libft.io.printf.format.parse
+deps:
+externals:
+kind: function
+*/
+#include "../printf_internal.h"
+
+static int ft_parse_flags(const char *s, int i, t_format *f) {
+  uint32_t flag;
+
+  flag = ft_char_to_flag(s[i]);
+  while (flag != 0) {
+    f->flags |= flag;
+    i++;
+    flag = ft_char_to_flag(s[i]);
+  }
+  return (i);
+}
+
+static int ft_parse_width(const char *s, int i, t_format *f) {
+  while (s[i] >= '0' && s[i] <= '9') {
+    f->width = f->width * 10 + (s[i] - '0');
+    i++;
+  }
+  return (i);
+}
+
+static int ft_parse_precision(const char *s, int i, t_format *f) {
+  if (s[i] == '.') {
+    f->precision = 0;
+    i++;
+    while (s[i] >= '0' && s[i] <= '9') {
+      f->precision = f->precision * 10 + (s[i] - '0');
+      i++;
+    }
+  }
+  return (i);
+}
+
+static int ft_parse_type(const char *s, int i, t_format *f) {
+  f->type = ft_char_to_conv(s[i]);
+  if (f->type != conv_none)
+    i++;
+  return (i);
+}
+
+int ft_parse_format(const char *s, int i, t_format *f) {
+  i = ft_parse_flags(s, i, f);
+  i = ft_parse_width(s, i, f);
+  i = ft_parse_precision(s, i, f);
+  i = ft_parse_type(s, i, f);
+  return (i);
+}
+/* sigma:end */

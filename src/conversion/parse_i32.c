@@ -31,7 +31,7 @@ sigma_parse_i32_result sigma_parse_i32(const char *text) {
     digits++;
   }
   result.tag = sigma_parse_i32_ok;
-  result.value = *text == '-' ? (i32)-(i64)magnitude : (i32)magnitude;
+  result.value = *text == '-' ? (i32) - (i64)magnitude : (i32)magnitude;
   return result;
 }
 /* sigma:end */
