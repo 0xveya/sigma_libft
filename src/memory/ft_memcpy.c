@@ -7,6 +7,12 @@
 
 typedef void (*memcpy_fn)(u8 *restrict, const u8 *restrict, usize);
 
+static void memcpy_scalar(u8 *restrict dst, const u8 *restrict src,
+                          usize size) {
+  while (size-- != 0)
+    *dst++ = *src++;
+}
+
 static void memcpy_sse2(u8 *restrict dst, const u8 *restrict src, usize size) {
   while (size >= 16) {
     _mm_storeu_si128((__m128i *)dst, _mm_loadu_si128((const __m128i *)src));
@@ -33,7 +39,14 @@ static void memcpy_avx2(u8 *restrict dst, const u8 *restrict src, usize size) {
 }
 
 static memcpy_fn select_memcpy(void) {
-  return sigma_cpu_has_avx2() ? memcpy_avx2 : memcpy_sse2;
+  switch (sigma_cpu_simd_level()) {
+  case sigma_simd_avx2:
+    return memcpy_avx2;
+  case sigma_simd_sse2:
+    return memcpy_sse2;
+  case sigma_simd_scalar:
+    return memcpy_scalar;
+  }
 }
 
 /* sigma:begin

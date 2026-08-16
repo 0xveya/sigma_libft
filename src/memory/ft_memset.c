@@ -7,6 +7,11 @@
 
 typedef void (*memset_fn)(u8 *, u8, usize);
 
+static void memset_scalar(u8 *dst, u8 byte, usize size) {
+  while (size-- != 0)
+    *dst++ = byte;
+}
+
 static void memset_sse2(u8 *dst, u8 byte, usize size) {
   __m128i value = _mm_set1_epi8((char)byte);
   while (size >= 16) {
@@ -32,7 +37,14 @@ static void memset_avx2(u8 *dst, u8 byte, usize size) {
 }
 
 static memset_fn select_memset(void) {
-  return sigma_cpu_has_avx2() ? memset_avx2 : memset_sse2;
+  switch (sigma_cpu_simd_level()) {
+  case sigma_simd_avx2:
+    return memset_avx2;
+  case sigma_simd_sse2:
+    return memset_sse2;
+  case sigma_simd_scalar:
+    return memset_scalar;
+  }
 }
 
 /* sigma:begin

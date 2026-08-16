@@ -12,17 +12,20 @@ const c_flags = [_][]const u8{
     "-Wundef",
 };
 
+const Simd = enum { auto, scalar, sse2 };
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const sigma_malloc = b.dependency("sigma_malloc", .{});
+    const simd = b.option(Simd, "simd", "Select SIMD dispatch: auto, scalar, or sse2") orelse .auto;
 
     const lib = b.addLibrary(.{
         .name = "sigma_libft",
         .linkage = .static,
         .root_module = b.createModule(.{ .target = target, .optimize = optimize }),
     });
-    configureC(b, lib.root_module, sigma_malloc);
+    configureC(b, lib.root_module, sigma_malloc, simd);
     b.installArtifact(lib);
     lib.installHeadersDirectory(b.path("include"), "", .{});
 
@@ -54,14 +57,19 @@ pub fn build(b: *std.Build) void {
         },
     });
     tests.use_llvm = true;
-    configureC(b, tests.root_module, sigma_malloc);
+    configureC(b, tests.root_module, sigma_malloc, simd);
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 }
 
-fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build.Dependency) void {
+fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build.Dependency, simd: Simd) void {
     module.link_libc = true;
     module.addIncludePath(b.path("include"));
     module.addIncludePath(sigma_malloc.path("include"));
+    switch (simd) {
+        .auto => {},
+        .scalar => module.addCMacro("SIGMA_SIMD_FORCE_SCALAR", "1"),
+        .sse2 => module.addCMacro("SIGMA_SIMD_FORCE_SSE2", "1"),
+    }
     module.addCSourceFiles(.{
         .root = b.path("src"),
         .files = &source_files,

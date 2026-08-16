@@ -9,6 +9,7 @@
         "build.zig",
         "build.zig.zon",
         "include",
+        "LICENSE",
         "src",
         "tests.zig",
         "test_runner.zig",

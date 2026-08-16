@@ -15,6 +15,14 @@ run = "zig build -Doptimize=Debug"
 description = "run the Zig tests"
 run = "zig build test"
 
+[tasks."test:simd"]
+description = "run tests through scalar, SSE2, and automatic SIMD routing"
+run = [
+  "zig build test -Dsimd=scalar",
+  "zig build test -Dsimd=sse2",
+  "zig build test -Dsimd=auto",
+]
+
 [tasks.compiledb]
 description = "generate compile_commands.json"
 run = "bear -- zig build -Doptimize=Debug"

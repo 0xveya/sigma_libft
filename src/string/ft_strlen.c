@@ -7,6 +7,13 @@
 
 typedef usize (*strlen_fn)(const char *);
 
+static usize strlen_scalar(const char *text) {
+  const char *end = text;
+  while (*end != '\0')
+    end++;
+  return (usize)(end - text);
+}
+
 static usize strlen_sse2(const char *text) {
   const char *cursor = text;
   while (((uptr)cursor & 15) != 0) {
@@ -46,7 +53,14 @@ static usize strlen_avx2(const char *text) {
 }
 
 static strlen_fn select_strlen(void) {
-  return sigma_cpu_has_avx2() ? strlen_avx2 : strlen_sse2;
+  switch (sigma_cpu_simd_level()) {
+  case sigma_simd_avx2:
+    return strlen_avx2;
+  case sigma_simd_sse2:
+    return strlen_sse2;
+  case sigma_simd_scalar:
+    return strlen_scalar;
+  }
 }
 
 /* sigma:begin
