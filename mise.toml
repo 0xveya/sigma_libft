@@ -25,7 +25,7 @@ run = [
 
 [tasks.compiledb]
 description = "generate compile_commands.json"
-run = "bear -- zig build -Doptimize=Debug"
+run = "make compiledb"
 
 [tasks.format]
 description = "format C sources and headers"

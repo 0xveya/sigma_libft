@@ -8,9 +8,13 @@ kind: function
 #include <sigma/libft.h>
 
 void *ft_memchr(const void *s, int c, size_t n) {
-  while (n--)
-    if (*(unsigned char *)s++ == (unsigned char)c)
-      return ((void *)s - 1);
+  const unsigned char *bytes = s;
+
+  while (n--) {
+    if (*bytes == (unsigned char)c)
+      return (void *)bytes;
+    bytes++;
+  }
   return (NULL);
 }
 
