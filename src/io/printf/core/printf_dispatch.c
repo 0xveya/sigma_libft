@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                       :::      ::::::::    */
-/*   printf_dispatch.c                                 :+:      :+:    :+:    */
-/*                                                   +:+ +:+         +:+      */
-/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
-/*                                               +#+#+#+#+#+   +#+            */
-/*   Created: 2026/04/26 17:00:28 by sfurst           #+#    #+#              */
-/*   Updated: 2026/04/26 18:06:49 by sfurst          ###   ########.fr        */
-/*                                                                            */
-/* ************************************************************************** */
-
 /* sigma:begin
 name: libft.io.printf.core.printf_dispatch
 provides: libft.io.printf.core.printf_dispatch

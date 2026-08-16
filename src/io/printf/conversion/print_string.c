@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                       :::      ::::::::    */
-/*   print_string.c                                    :+:      :+:    :+:    */
-/*                                                   +:+ +:+         +:+      */
-/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
-/*                                               +#+#+#+#+#+   +#+            */
-/*   Created: 2026/04/26 18:16:02 by sfurst           #+#    #+#              */
-/*   Updated: 2026/04/26 18:18:57 by sfurst          ###   ########.fr        */
-/*                                                                            */
-/* ************************************************************************** */
-
 /* sigma:begin
 name: libft.io.printf.conversion.print_string
 provides: libft.io.printf.conversion.print_string

@@ -2,7 +2,7 @@
 
 #include <allocator_vtable.h>
 #include <sigma/attributes.h>
-#include <sigma/qol.h>
+#include <sigma/slice.h>
 #include <stdbool.h>
 
 typedef struct sigma_map_entry {
@@ -18,7 +18,6 @@ typedef struct sigma_str_map {
   allocator_t allocator;
 } sigma_str_map;
 
-SIGMA_NODISCARD str_t sigma_str_from_cstr(const char *text);
 u64 sigma_str_hash(str_t string);
 SIGMA_NODISCARD bool sigma_str_map_init(sigma_str_map *map,
                                         allocator_t allocator, usize capacity);

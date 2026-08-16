@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                       :::      ::::::::    */
-/*   print_uint.c                                      :+:      :+:    :+:    */
-/*                                                   +:+ +:+         +:+      */
-/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
-/*                                               +#+#+#+#+#+   +#+            */
-/*   Created: 2026/04/26 18:16:21 by sfurst           #+#    #+#              */
-/*   Updated: 2026/04/26 18:39:05 by sfurst          ###   ########.fr        */
-/*                                                                            */
-/* ************************************************************************** */
-
 /* sigma:begin
 name: libft.io.printf.conversion.print_uint
 provides: libft.io.printf.conversion.print_uint

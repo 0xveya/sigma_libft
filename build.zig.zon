@@ -11,5 +11,6 @@
         "include",
         "src",
         "tests.zig",
+        "test_runner.zig",
     },
 }

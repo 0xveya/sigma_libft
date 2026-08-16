@@ -2,7 +2,7 @@
 
 #include <allocator_vtable.h>
 #include <sigma/attributes.h>
-#include <sigma/qol.h>
+#include <sigma/slice.h>
 #include <stdbool.h>
 
 #define SIGMA_READER_BUFFER_SIZE 4096u

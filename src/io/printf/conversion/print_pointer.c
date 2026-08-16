@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                       :::      ::::::::    */
-/*   print_pointer.c                                   :+:      :+:    :+:    */
-/*                                                   +:+ +:+         +:+      */
-/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
-/*                                               +#+#+#+#+#+   +#+            */
-/*   Created: 2026/04/26 18:14:56 by sfurst           #+#    #+#              */
-/*   Updated: 2026/08/15 23:59:50 by sfurst          ###   ########.fr        */
-/*                                                                            */
-/* ************************************************************************** */
-
 /* sigma:begin
 name: libft.io.printf.conversion.print_pointer
 provides: libft.io.printf.conversion.print_pointer

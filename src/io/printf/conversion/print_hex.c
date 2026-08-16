@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                       :::      ::::::::    */
-/*   print_hex.c                                       :+:      :+:    :+:    */
-/*                                                   +:+ +:+         +:+      */
-/*   By: sfurst <sfurst@student.42vienna.com>      #+#  +:+       +#+         */
-/*                                               +#+#+#+#+#+   +#+            */
-/*   Created: 2026/04/26 18:13:39 by sfurst           #+#    #+#              */
-/*   Updated: 2026/04/26 18:51:52 by sfurst          ###   ########.fr        */
-/*                                                                            */
-/* ************************************************************************** */
-
 /* sigma:begin
 name: libft.io.printf.conversion.print_hex
 provides: libft.io.printf.conversion.print_hex

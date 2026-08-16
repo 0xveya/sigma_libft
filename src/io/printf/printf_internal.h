@@ -2,6 +2,8 @@
 
 #include <sigma/libft.h>
 
+#include <stdarg.h>
+
 #define FT_PRINTF_BUFFER_SIZE 4096
 
 typedef enum ft_conversion {

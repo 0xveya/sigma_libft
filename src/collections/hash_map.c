@@ -2,18 +2,6 @@
 #include <sigma/libft.h>
 
 /* sigma:begin
-name: libft.str.from_cstr
-provides: str.from_cstr
-deps: str.len
-externals:
-kind: function
-*/
-str_t sigma_str_from_cstr(const char *text) {
-  return (str_t){.items = (char *)text, .len = ft_strlen(text)};
-}
-/* sigma:end */
-
-/* sigma:begin
 name: libft.str.hash
 provides: str.hash
 deps:
@@ -28,17 +16,12 @@ u64 sigma_str_hash(str_t string) {
 }
 /* sigma:end */
 
-static bool str_eq(str_t left, str_t right) {
-  return left.len == right.len &&
-         ft_memcmp(left.items, right.items, left.len) == 0;
-}
-
 static sigma_map_entry *find_entry(sigma_map_entry *entries, usize capacity,
                                    str_t key) {
   usize index = sigma_str_hash(key) % capacity;
   for (;;) {
     sigma_map_entry *entry = &entries[index];
-    if (!entry->occupied || str_eq(entry->key, key))
+    if (!entry->occupied || sigma_str_eq(entry->key, key))
       return entry;
     index = (index + 1) % capacity;
   }
@@ -115,7 +98,7 @@ str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
     sigma_map_entry *entry = &map->entries[index];
     if (!entry->occupied)
       return nullptr;
-    if (str_eq(entry->key, key))
+    if (sigma_str_eq(entry->key, key))
       return &entry->value;
     index = (index + 1) % map->cap;
   }

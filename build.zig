@@ -48,6 +48,10 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
             .imports = &.{.{ .name = "c", .module = translated.createModule() }},
         }),
+        .test_runner = .{
+            .path = b.path("test_runner.zig"),
+            .mode = .simple,
+        },
     });
     tests.use_llvm = true;
     configureC(b, tests.root_module, sigma_malloc);
@@ -88,7 +92,6 @@ const source_files = [_][]const u8{
     "io/printf/format/parse.c",
     "io/printf/format/parse_utils.c",
     "io/printf/support/writer.c",
-    "io/reader.c",
     "list/ft_lstadd_back.c",
     "list/ft_lstadd_front.c",
     "list/ft_lstclear.c",
@@ -105,6 +108,8 @@ const source_files = [_][]const u8{
     "memory/ft_memcpy.c",
     "memory/ft_memmove.c",
     "memory/ft_memset.c",
+    "reader/reader.c",
+    "slice/str.c",
     "string/ft_split.c",
     "string/ft_strchr.c",
     "string/ft_strdup.c",

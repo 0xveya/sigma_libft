@@ -42,6 +42,28 @@ test "memory primitives handle exact byte ranges" {
     try std.testing.expectEqual(@as(usize, 5), c.ft_strlen("hello"));
 }
 
+test "SIMD memory paths preserve guards and tails" {
+    var source: [193]u8 = undefined;
+    var destination = [_]u8{0xcc} ** 197;
+    for (&source, 0..) |*byte, index|
+        byte.* = @truncate(index * 17);
+
+    _ = c.ft_memcpy(&destination[2], &source, source.len);
+    try std.testing.expectEqual(@as(u8, 0xcc), destination[1]);
+    try std.testing.expectEqualSlices(u8, &source, destination[2 .. 2 + source.len]);
+    try std.testing.expectEqual(@as(u8, 0xcc), destination[195]);
+
+    _ = c.ft_memset(&destination[3], 0x5a, 191);
+    try std.testing.expectEqual(@as(u8, source[0]), destination[2]);
+    try std.testing.expectEqualSlices(u8, &([_]u8{0x5a} ** 191), destination[3..194]);
+    try std.testing.expectEqual(@as(u8, source[192]), destination[194]);
+}
+
+test "SIMD strlen handles unaligned long strings" {
+    const text = "x" ++ ("0123456789abcdef" ** 8);
+    try std.testing.expectEqual(@as(usize, text.len - 1), c.ft_strlen(text.ptr + 1));
+}
+
 test "string map grows and retrieves values" {
     var map: c.sigma_str_map = undefined;
     try std.testing.expect(c.sigma_str_map_init(&map, testAllocator(), 0));
