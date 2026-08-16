@@ -1,0 +1,28 @@
+[tools]
+zig = "0.16.0"
+clang-format = "latest"
+"conda:bear" = "latest"
+
+[tasks.build]
+description = "build sigma_libft"
+run = "zig build -Doptimize=ReleaseFast"
+
+[tasks.dev]
+description = "build sigma_libft with debug checks"
+run = "zig build -Doptimize=Debug"
+
+[tasks.test]
+description = "run the Zig tests"
+run = "zig build test"
+
+[tasks.compiledb]
+description = "generate compile_commands.json"
+run = "bear -- zig build -Doptimize=Debug"
+
+[tasks.format]
+description = "format C sources and headers"
+run = "find src include -type f \\( -name '*.c' -o -name '*.h' \\) -print0 | xargs -0 clang-format -i"
+
+[tasks.clean]
+description = "remove generated build files"
+run = "rm -rf zig-out .zig-cache compile_commands.json"
