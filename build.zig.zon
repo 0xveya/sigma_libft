@@ -1,7 +1,7 @@
 .{
     .name = .sigma_libft,
     .version = "0.1.0",
-    .fingerprint = 0x44ffd9e3368ab192,
+    .fingerprint = 0xb7304a5f79fbe5e9,
     .dependencies = .{
         .sigma_malloc = .{ .path = "../sigma_malloc" },
     },

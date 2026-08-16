@@ -1,0 +1,31 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ft_memcmp.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sfurst <sfurst@student.42vienna.com>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 16:14:00 by sfurst            #+#    #+#             */
+/*   Updated: 2026/04/24 19:16:34 by sfurst           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <sigma/libft.h>
+
+int	ft_memcmp(const void *s1, const void *s2, size_t n)
+{
+	unsigned char	*temp1;
+	unsigned char	*temp2;
+
+	temp1 = (unsigned char *)s1;
+	temp2 = (unsigned char *)s2;
+	if (!n)
+		return (0);
+	while (--n && *temp1 == *temp2)
+	{
+		temp1++;
+		temp2++;
+	}
+	return ((int)*temp1 - *temp2);
+}
+
