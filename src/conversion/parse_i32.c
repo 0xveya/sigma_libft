@@ -1,7 +1,7 @@
 #include <sigma/libft.h>
 
 /* sigma:begin
-name: libft.parse_i32
+name: libft.conversion.parse_i32.sigma_parse_i32
 provides: int.parse.i32
 deps:
 externals:
@@ -37,7 +37,7 @@ sigma_parse_i32_result sigma_parse_i32(const char *text) {
 /* sigma:end */
 
 /* sigma:begin
-name: libft.atoi
+name: libft.conversion.parse_i32.ft_atoi
 provides: int.atoi
 deps: int.parse.i32
 externals:

@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strchr
-provides: libft.string.ft_strchr
+name: libft.string.ft_strchr.ft_strchr
+provides: libft.ft_strchr
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_strchr(const char *s, int c) {
   while (*s)
     if (*s++ == (char)c)
@@ -15,5 +15,4 @@ char *ft_strchr(const char *s, int c) {
     return ((char *)s);
   return (NULL);
 }
-
 /* sigma:end */

@@ -1,21 +1,37 @@
+#include "../printf_internal.h"
+
 /* sigma:begin
-name: libft.io.printf.format.parse_utils
-provides: libft.io.printf.format.parse_utils
+name: libft.io.printf.format.parse_utils.ft_format_has
+provides: libft.ft_format_has
 deps:
 externals:
 kind: function
 */
-#include "../printf_internal.h"
-
 int ft_format_has(const t_format *f, uint32_t flag) {
   return ((f->flags & flag) != 0);
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.format.parse_utils.ft_format_init
+provides: libft.ft_format_init
+deps:
+externals:
+kind: function
+*/
 void ft_format_init(t_format *f) {
   *f = (t_format){0};
   f->precision = -1;
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.format.parse_utils.ft_char_to_flag
+provides: libft.ft_char_to_flag
+deps:
+externals:
+kind: function
+*/
 uint32_t ft_char_to_flag(char c) {
   if (c == '-')
     return (FMT_MINUS);
@@ -29,7 +45,15 @@ uint32_t ft_char_to_flag(char c) {
     return (FMT_SPACE);
   return (0);
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.format.parse_utils.ft_char_to_conv
+provides: libft.ft_char_to_conv
+deps:
+externals:
+kind: function
+*/
 t_conv ft_char_to_conv(char c) {
   if (c == 'c')
     return (conv_char);

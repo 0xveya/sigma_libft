@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.conversion.ft_itoa
-provides: libft.conversion.ft_itoa
-deps:
-externals:
-kind: function
-*/
 #include <sigma/libft.h>
 
 static int ft_numlen(long n) {
@@ -20,6 +13,13 @@ static int ft_numlen(long n) {
   return (len);
 }
 
+/* sigma:begin
+name: libft.conversion.ft_itoa.ft_itoa
+provides: libft.ft_itoa
+deps:
+externals:
+kind: function
+*/
 char *ft_itoa(int n) {
   char *str;
   long nb;

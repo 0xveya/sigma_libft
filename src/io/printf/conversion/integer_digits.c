@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.io.printf.conversion.integer_digits
-provides: libft.io.printf.conversion.integer_digits
-deps:
-externals:
-kind: function
-*/
 #include "../printf_internal.h"
 
 static const char *ft_digits100(void) {
@@ -20,6 +13,13 @@ static const char *ft_digits100(void) {
           "90919293949596979899");
 }
 
+/* sigma:begin
+name: libft.io.printf.conversion.integer_digits.ft_u64_dec
+provides: libft.ft_u64_dec
+deps:
+externals:
+kind: function
+*/
 char *ft_u64_dec(char *end, uint64_t n) {
   const char *digits100;
   uint32_t pair;
@@ -44,7 +44,15 @@ char *ft_u64_dec(char *end, uint64_t n) {
   }
   return (end);
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.conversion.integer_digits.ft_u64_pow2
+provides: libft.ft_u64_pow2
+deps:
+externals:
+kind: function
+*/
 char *ft_u64_pow2(char *end, uint64_t n, uint32_t shift, const char *digits) {
   uint64_t mask;
 
@@ -57,7 +65,15 @@ char *ft_u64_pow2(char *end, uint64_t n, uint32_t shift, const char *digits) {
   }
   return (end);
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.conversion.integer_digits.ft_u64_base
+provides: libft.ft_u64_base
+deps:
+externals:
+kind: function
+*/
 char *ft_u64_base(char *end, uint64_t n, uint32_t base, const char *digits) {
   if (n == 0)
     *--end = '0';

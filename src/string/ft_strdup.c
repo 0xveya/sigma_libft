@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strdup
-provides: libft.string.ft_strdup
+name: libft.string.ft_strdup.ft_strdup
+provides: libft.ft_strdup
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_strdup(const char *s) {
   char *ptr;
   size_t len;
@@ -20,5 +20,4 @@ char *ft_strdup(const char *s) {
   ft_memcpy(ptr, s, len + 1);
   return (ptr);
 }
-
 /* sigma:end */

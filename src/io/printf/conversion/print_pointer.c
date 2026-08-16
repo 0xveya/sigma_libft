@@ -1,12 +1,12 @@
+#include "../printf_internal.h"
+
 /* sigma:begin
-name: libft.io.printf.conversion.print_pointer
-provides: libft.io.printf.conversion.print_pointer
+name: libft.io.printf.conversion.print_pointer.ft_print_ptr_fmt
+provides: libft.ft_print_ptr_fmt
 deps:
 externals:
 kind: function
 */
-#include "../printf_internal.h"
-
 int ft_print_ptr_fmt(t_writer *w, void *ptr, t_format *f) {
   char buf[2 * sizeof(uintptr_t)];
   char *begin;

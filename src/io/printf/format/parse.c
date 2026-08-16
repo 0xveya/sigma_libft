@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.io.printf.format.parse
-provides: libft.io.printf.format.parse
-deps:
-externals:
-kind: function
-*/
 #include "../printf_internal.h"
 
 static int ft_parse_flags(const char *s, int i, t_format *f) {
@@ -46,6 +39,13 @@ static int ft_parse_type(const char *s, int i, t_format *f) {
   return (i);
 }
 
+/* sigma:begin
+name: libft.io.printf.format.parse.ft_parse_format
+provides: libft.ft_parse_format
+deps:
+externals:
+kind: function
+*/
 int ft_parse_format(const char *s, int i, t_format *f) {
   i = ft_parse_flags(s, i, f);
   i = ft_parse_width(s, i, f);

@@ -50,7 +50,7 @@ static memcpy_fn select_memcpy(void) {
 }
 
 /* sigma:begin
-name: libft.memcpy
+name: libft.memory.ft_memcpy.ft_memcpy
 provides: mem.copy
 deps:
 externals:

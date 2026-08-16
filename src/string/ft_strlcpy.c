@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strlcpy
-provides: libft.string.ft_strlcpy
+name: libft.string.ft_strlcpy.ft_strlcpy
+provides: libft.ft_strlcpy
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 size_t ft_strlcpy(char *dst, const char *src, size_t size) {
   unsigned int i;
   unsigned int srclen;
@@ -24,5 +24,4 @@ size_t ft_strlcpy(char *dst, const char *src, size_t size) {
   dst[i] = '\0';
   return (srclen);
 }
-
 /* sigma:end */

@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_substr
-provides: libft.string.ft_substr
+name: libft.string.ft_substr.ft_substr
+provides: libft.ft_substr
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_substr(char const *s, unsigned int start, size_t len) {
   char *ptr;
   size_t s_len;
@@ -25,5 +25,4 @@ char *ft_substr(char const *s, unsigned int start, size_t len) {
   ptr[len] = '\0';
   return (ptr);
 }
-
 /* sigma:end */

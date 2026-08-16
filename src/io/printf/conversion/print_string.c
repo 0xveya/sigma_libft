@@ -1,12 +1,12 @@
+#include "../printf_internal.h"
+
 /* sigma:begin
-name: libft.io.printf.conversion.print_string
-provides: libft.io.printf.conversion.print_string
+name: libft.io.printf.conversion.print_string.ft_print_str_fmt
+provides: libft.ft_print_str_fmt
 deps:
 externals:
 kind: function
 */
-#include "../printf_internal.h"
-
 int ft_print_str_fmt(t_writer *w, const char *s, t_format *f) {
   int len;
   int pad;

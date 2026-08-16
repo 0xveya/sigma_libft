@@ -2,7 +2,7 @@
 #include <sigma/libft.h>
 
 /* sigma:begin
-name: libft.str.hash
+name: libft.collections.hash_map.sigma_str_hash
 provides: str.hash
 deps:
 externals:
@@ -65,9 +65,9 @@ static bool grow(sigma_str_map *map) {
 }
 
 /* sigma:begin
-name: libft.str.map
-provides: str.map
-deps: mem.alloc, mem.free, mem.compare, str.hash
+name: libft.collections.hash_map.sigma_str_map_init
+provides: str.map.init
+deps: mem.alloc
 externals:
 kind: function
 */
@@ -84,12 +84,28 @@ bool sigma_str_map_init(sigma_str_map *map, allocator_t allocator,
   map->cap = capacity;
   return true;
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.collections.hash_map.sigma_str_map_deinit
+provides: str.map.deinit
+deps: mem.free
+externals:
+kind: function
+*/
 void sigma_str_map_deinit(sigma_str_map *map) {
   free_entries(map);
   *map = (sigma_str_map){};
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.collections.hash_map.sigma_str_map_get
+provides: str.map.get
+deps: mem.compare, str.hash
+externals:
+kind: function
+*/
 str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
   if (map == nullptr || map->cap == 0)
     return nullptr;
@@ -104,11 +120,27 @@ str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
   }
   return nullptr;
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.collections.hash_map.sigma_str_map_has
+provides: str.map.has
+deps: str.map.get
+externals:
+kind: function
+*/
 bool sigma_str_map_has(sigma_str_map *map, str_t key) {
   return sigma_str_map_get(map, key) != nullptr;
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.collections.hash_map.sigma_str_map_put
+provides: str.map.put
+deps: mem.alloc, mem.compare, str.hash
+externals:
+kind: function
+*/
 bool sigma_str_map_put(sigma_str_map *map, str_t key, str_t value) {
   if (map == nullptr)
     return false;

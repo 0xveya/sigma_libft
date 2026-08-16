@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strmapi
-provides: libft.string.ft_strmapi
+name: libft.string.ft_strmapi.ft_strmapi
+provides: libft.ft_strmapi
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_strmapi(char const *s, char (*f)(unsigned int, char)) {
   char *str;
   int i;

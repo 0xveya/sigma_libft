@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.string.ft_strtrim
-provides: libft.string.ft_strtrim
-deps:
-externals:
-kind: function
-*/
 #include <sigma/libft.h>
 
 static int ft_isset(char c, char const *set) {
@@ -19,6 +12,13 @@ static int ft_isset(char c, char const *set) {
   return (0);
 }
 
+/* sigma:begin
+name: libft.string.ft_strtrim.ft_strtrim
+provides: libft.ft_strtrim
+deps:
+externals:
+kind: function
+*/
 char *ft_strtrim(char const *s1, char const *set) {
   size_t start;
   size_t end;
@@ -42,5 +42,4 @@ char *ft_strtrim(char const *s1, char const *set) {
   trimmed[i] = '\0';
   return (trimmed);
 }
-
 /* sigma:end */

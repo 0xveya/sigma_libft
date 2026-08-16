@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.memory.ft_memchr
-provides: libft.memory.ft_memchr
+name: libft.memory.ft_memchr.ft_memchr
+provides: libft.ft_memchr
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 void *ft_memchr(const void *s, int c, size_t n) {
   const unsigned char *bytes = s;
 
@@ -17,5 +17,4 @@ void *ft_memchr(const void *s, int c, size_t n) {
   }
   return (NULL);
 }
-
 /* sigma:end */

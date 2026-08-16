@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.io.printf.conversion.print_int
-provides: libft.io.printf.conversion.print_int
-deps:
-externals:
-kind: function
-*/
 #include "../printf_internal.h"
 
 static void ft_prepare_value(t_intfmt *v, int n, t_format *f) {
@@ -44,6 +37,13 @@ static void ft_write_int_body(t_writer *w, t_intfmt *v, const char *digits) {
     ft_writer_write(w, digits, (size_t)v->digits_len);
 }
 
+/* sigma:begin
+name: libft.io.printf.conversion.print_int.ft_print_int_fmt
+provides: libft.ft_print_int_fmt
+deps:
+externals:
+kind: function
+*/
 int ft_print_int_fmt(t_writer *w, int n, t_format *f) {
   t_intfmt v;
   char buf[32];

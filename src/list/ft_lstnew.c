@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.list.ft_lstnew
-provides: libft.list.ft_lstnew
+name: libft.list.ft_lstnew.ft_lstnew
+provides: libft.ft_lstnew
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 t_list *ft_lstnew(void *content) {
   t_list *new;
 
@@ -17,5 +17,4 @@ t_list *ft_lstnew(void *content) {
   new->next = NULL;
   return (new);
 }
-
 /* sigma:end */

@@ -46,6 +46,7 @@ typedef struct ft_writer {
   usize len;
   i32 total;
   i32 error;
+  i32 fd;
 } ft_writer;
 
 #define t_conv ft_conversion

@@ -1,11 +1,16 @@
 const std = @import("std");
 const c = @import("c");
 
+var allocation_count: usize = 0;
+var free_count: usize = 0;
+
 fn testAlloc(_: ?*anyopaque, size: usize, _: usize) callconv(.c) ?*anyopaque {
+    allocation_count += 1;
     return std.c.malloc(size);
 }
 
 fn testFree(_: ?*anyopaque, ptr: ?*anyopaque, _: usize, _: usize) callconv(.c) void {
+    free_count += 1;
     std.c.free(ptr);
 }
 
@@ -39,31 +44,6 @@ fn countNode(_: ?*anyopaque) callconv(.c) void {
 
 fn identityContent(content: ?*anyopaque) callconv(.c) ?*anyopaque {
     return content;
-}
-
-fn pipeText(comptime writeFn: fn (c_int) void) ![]u8 {
-    var fds: [2]c_int = undefined;
-    try std.testing.expectEqual(@as(c_int, 0), c.pipe(&fds));
-    writeFn(fds[1]);
-    _ = c.close(fds[1]);
-    var buffer: [128]u8 = undefined;
-    const count = c.read(fds[0], &buffer, buffer.len);
-    _ = c.close(fds[0]);
-    try std.testing.expect(count >= 0);
-    return std.testing.allocator.dupe(u8, buffer[0..@intCast(count)]);
-}
-
-fn writeChar(fd: c_int) void {
-    c.ft_putchar_fd('x', fd);
-}
-fn writeString(fd: c_int) void {
-    c.ft_putstr_fd(@constCast("hello"), fd);
-}
-fn writeLine(fd: c_int) void {
-    c.ft_putendl_fd(@constCast("hello"), fd);
-}
-fn writeNumber(fd: c_int) void {
-    c.ft_putnbr_fd(-2147483648, fd);
 }
 
 test "parse i32 distinguishes valid, invalid, and overflow input" {
@@ -393,28 +373,16 @@ test "ft_lstmap" {
     try std.testing.expectEqual(@as(c_int, 2), c.ft_lstsize(mapped));
 }
 
-test "ft_putchar_fd" {
-    const output = try pipeText(writeChar);
-    defer std.testing.allocator.free(output);
-    try std.testing.expectEqualStrings("x", output);
-}
-
-test "ft_putstr_fd" {
-    const output = try pipeText(writeString);
-    defer std.testing.allocator.free(output);
-    try std.testing.expectEqualStrings("hello", output);
-}
-
-test "ft_putendl_fd" {
-    const output = try pipeText(writeLine);
-    defer std.testing.allocator.free(output);
-    try std.testing.expectEqualStrings("hello\n", output);
-}
-
-test "ft_putnbr_fd" {
-    const output = try pipeText(writeNumber);
-    defer std.testing.allocator.free(output);
-    try std.testing.expectEqualStrings("-2147483648", output);
+test "ft_fprintf" {
+    var fds: [2]c_int = undefined;
+    try std.testing.expectEqual(@as(c_int, 0), c.pipe(&fds));
+    const written = c.ft_fprintf(fds[1], "value=%d %s", @as(c_int, 42), "ok");
+    _ = c.close(fds[1]);
+    var buffer: [64]u8 = undefined;
+    const count = c.read(fds[0], &buffer, buffer.len);
+    _ = c.close(fds[0]);
+    try std.testing.expectEqual(@as(c_int, 11), written);
+    try std.testing.expectEqualStrings("value=42 ok", buffer[0..@intCast(count)]);
 }
 
 test "ft_printf" {
@@ -503,4 +471,27 @@ test "sigma_line_reader_next" {
     const line = c.sigma_line_reader_next(&reader);
     try std.testing.expectEqual(@as(c_uint, c.sigma_line_ok), line.tag);
     try std.testing.expectEqualSlices(u8, "line", line.line.items[0..line.line.len]);
+}
+
+test "line reader scans long lines and clears its arena" {
+    allocation_count = 0;
+    free_count = 0;
+    var input = [_]u8{'x'} ** 9001;
+    input[input.len - 1] = '\n';
+    var fds: [2]c_int = undefined;
+    try std.testing.expectEqual(@as(c_int, 0), c.pipe(&fds));
+    try std.testing.expectEqual(@as(isize, input.len), c.write(fds[1], &input, input.len));
+    _ = c.close(fds[1]);
+    defer _ = c.close(fds[0]);
+
+    var reader: c.sigma_line_reader = undefined;
+    c.sigma_line_reader_init(&reader, fds[0], testAllocator());
+    const line = c.sigma_line_reader_next(&reader);
+    try std.testing.expectEqual(@as(c_uint, c.sigma_line_ok), line.tag);
+    try std.testing.expectEqual(@as(usize, input.len - 1), line.line.len);
+    try std.testing.expect(reader.arena.blocks != null);
+    c.sigma_line_reader_deinit(&reader);
+    try std.testing.expect(reader.arena.blocks == null);
+    try std.testing.expect(allocation_count > 0);
+    try std.testing.expectEqual(allocation_count, free_count);
 }

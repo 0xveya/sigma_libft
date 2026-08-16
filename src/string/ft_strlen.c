@@ -64,7 +64,7 @@ static strlen_fn select_strlen(void) {
 }
 
 /* sigma:begin
-name: libft.strlen
+name: libft.string.ft_strlen.ft_strlen
 provides: str.len
 deps:
 externals:

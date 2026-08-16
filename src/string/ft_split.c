@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.string.ft_split
-provides: libft.string.ft_split
-deps:
-externals:
-kind: function
-*/
 #include <sigma/libft.h>
 
 static int count_words(const char *str, char delim) {
@@ -58,6 +51,13 @@ static int add_word(char **arr, int *i, const char *str, char c) {
   return (1);
 }
 
+/* sigma:begin
+name: libft.string.ft_split.ft_split
+provides: libft.ft_split
+deps:
+externals:
+kind: function
+*/
 char **ft_split(char const *str, char c) {
   int word_count;
   char **arr;

@@ -48,7 +48,7 @@ static memset_fn select_memset(void) {
 }
 
 /* sigma:begin
-name: libft.memset
+name: libft.memory.ft_memset.ft_memset
 provides: mem.set
 deps:
 externals:

@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strnstr
-provides: libft.string.ft_strnstr
+name: libft.string.ft_strnstr.ft_strnstr
+provides: libft.ft_strnstr
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_strnstr(const char *str, const char *to_find, size_t n) {
   size_t i;
   size_t j;
@@ -24,5 +24,4 @@ char *ft_strnstr(const char *str, const char *to_find, size_t n) {
   }
   return (NULL);
 }
-
 /* sigma:end */

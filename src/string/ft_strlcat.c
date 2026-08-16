@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strlcat
-provides: libft.string.ft_strlcat
+name: libft.string.ft_strlcat.ft_strlcat
+provides: libft.ft_strlcat
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 size_t ft_strlcat(char *dst, const char *src, size_t size) {
   size_t i;
   size_t srclen;
@@ -28,5 +28,4 @@ size_t ft_strlcat(char *dst, const char *src, size_t size) {
   dst[dstlen + i] = '\0';
   return (dstlen + srclen);
 }
-
 /* sigma:end */

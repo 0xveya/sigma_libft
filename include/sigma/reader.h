@@ -1,6 +1,6 @@
 #pragma once
 
-#include <allocator_vtable.h>
+#include <arena_allocator.h>
 #include <sigma/attributes.h>
 #include <sigma/slice.h>
 #include <stdbool.h>
@@ -28,6 +28,7 @@ typedef struct sigma_line_reader {
   usize line_capacity;
   bool reached_eof;
   allocator_t allocator;
+  allocator_arena_t arena;
 } sigma_line_reader;
 
 void sigma_line_reader_init(sigma_line_reader *reader, i32 fd,

@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.list.ft_lstmap
-provides: libft.list.ft_lstmap
+name: libft.list.ft_lstmap.ft_lstmap
+provides: libft.ft_lstmap
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 t_list *ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *)) {
   t_list *new_lst;
   t_list *new_node;
@@ -26,5 +26,4 @@ t_list *ft_lstmap(t_list *lst, void *(*f)(void *), void (*del)(void *)) {
   }
   return (new_lst);
 }
-
 /* sigma:end */

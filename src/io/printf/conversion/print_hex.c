@@ -1,10 +1,3 @@
-/* sigma:begin
-name: libft.io.printf.conversion.print_hex
-provides: libft.io.printf.conversion.print_hex
-deps:
-externals:
-kind: function
-*/
 #include "../printf_internal.h"
 
 static int ft_print_hex(t_writer *w, uint32_t n, t_format *f,
@@ -23,10 +16,25 @@ static int ft_print_hex(t_writer *w, uint32_t n, t_format *f,
   return (!w->error);
 }
 
+/* sigma:begin
+name: libft.io.printf.conversion.print_hex.ft_print_hex_low_fmt
+provides: libft.ft_print_hex_low_fmt
+deps:
+externals:
+kind: function
+*/
 int ft_print_hex_low_fmt(t_writer *w, unsigned int n, t_format *f) {
   return (ft_print_hex(w, (uint32_t)n, f, "0123456789abcdefx"));
 }
+/* sigma:end */
 
+/* sigma:begin
+name: libft.io.printf.conversion.print_hex.ft_print_hex_up_fmt
+provides: libft.ft_print_hex_up_fmt
+deps:
+externals:
+kind: function
+*/
 int ft_print_hex_up_fmt(t_writer *w, unsigned int n, t_format *f) {
   return (ft_print_hex(w, (uint32_t)n, f, "0123456789ABCDEFX"));
 }

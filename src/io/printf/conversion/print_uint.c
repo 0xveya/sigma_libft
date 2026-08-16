@@ -1,12 +1,12 @@
+#include "../printf_internal.h"
+
 /* sigma:begin
-name: libft.io.printf.conversion.print_uint
-provides: libft.io.printf.conversion.print_uint
+name: libft.io.printf.conversion.print_uint.ft_print_uint_fmt
+provides: libft.ft_print_uint_fmt
 deps:
 externals:
 kind: function
 */
-#include "../printf_internal.h"
-
 int ft_print_uint_fmt(t_writer *w, unsigned int n, t_format *f) {
   char buf[32];
   char *begin;

@@ -1,12 +1,12 @@
+#include "../printf_internal.h"
+
 /* sigma:begin
-name: libft.io.printf.core.printf_dispatch
-provides: libft.io.printf.core.printf_dispatch
+name: libft.io.printf.core.printf_dispatch.ft_dispatch_print
+provides: libft.ft_dispatch_print
 deps:
 externals:
 kind: function
 */
-#include "../printf_internal.h"
-
 int ft_dispatch_print(t_writer *w, t_format *f, va_list args) {
   if (f->type == conv_char)
     return (ft_print_char_fmt(w, va_arg(args, int), f));

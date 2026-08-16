@@ -1,12 +1,12 @@
+#include <sigma/libft.h>
+
 /* sigma:begin
-name: libft.string.ft_strjoin
-provides: libft.string.ft_strjoin
+name: libft.string.ft_strjoin.ft_strjoin
+provides: libft.ft_strjoin
 deps:
 externals:
 kind: function
 */
-#include <sigma/libft.h>
-
 char *ft_strjoin(char const *s1, char const *s2) {
   char *ptr;
   size_t s1_len;
@@ -23,5 +23,4 @@ char *ft_strjoin(char const *s1, char const *s2) {
     ft_memcpy(ptr + s1_len, s2, s2_len);
   return (ptr[s1_len + s2_len] = '\0', ptr);
 }
-
 /* sigma:end */
