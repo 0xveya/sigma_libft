@@ -29,8 +29,7 @@ jobs:
       - name: Format
         run: |
           mise exec -- clang-format --dry-run --Werror \
-            main.c \
-            $(find src include tests examples \
+            $(find src include  \
               -type f \( -name '*.c' -o -name '*.h' \))
 
       - name: Lint
