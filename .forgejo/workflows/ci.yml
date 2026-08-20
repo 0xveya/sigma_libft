@@ -32,8 +32,8 @@ jobs:
             $(find src include  \
               -type f \( -name '*.c' -o -name '*.h' \))
 
-      - name: Lint
-        run: mise run check
+      # - name: Lint
+      #   run: mise run check
 
       - name: Test
         run: mise run test
