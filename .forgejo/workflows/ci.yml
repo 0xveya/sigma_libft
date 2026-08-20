@@ -24,7 +24,7 @@ jobs:
         run: |
           mise exec -- zig version
           mise exec -- clang-format --version
-          mise exec -- cppcheck --version
+          # mise exec -- cppcheck --version
 
       - name: Format
         run: |
