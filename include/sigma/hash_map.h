@@ -2,7 +2,7 @@
 
 #include <allocator_vtable.h>
 #include <sigma/attributes.h>
-#include <sigma/slice.h>
+#include <sigma/str.h>
 #include <stdbool.h>
 
 typedef struct sigma_map_entry {

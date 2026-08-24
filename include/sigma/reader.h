@@ -2,7 +2,7 @@
 
 #include <arena_allocator.h>
 #include <sigma/attributes.h>
-#include <sigma/slice.h>
+#include <sigma/str.h>
 #include <stdbool.h>
 
 #define SIGMA_READER_BUFFER_SIZE 4096u

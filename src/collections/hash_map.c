@@ -21,7 +21,7 @@ static sigma_map_entry *find_entry(sigma_map_entry *entries, usize capacity,
   usize index = sigma_str_hash(key) % capacity;
   for (;;) {
     sigma_map_entry *entry = &entries[index];
-    if (!entry->occupied || sigma_str_eq(entry->key, key))
+    if (!entry->occupied || str_eq(entry->key, key))
       return entry;
     index = (index + 1) % capacity;
   }
@@ -114,7 +114,7 @@ str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
     sigma_map_entry *entry = &map->entries[index];
     if (!entry->occupied)
       return nullptr;
-    if (sigma_str_eq(entry->key, key))
+    if (str_eq(entry->key, key))
       return &entry->value;
     index = (index + 1) % map->cap;
   }

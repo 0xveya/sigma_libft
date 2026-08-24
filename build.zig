@@ -78,6 +78,7 @@ fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build
 }
 
 const source_files = [_][]const u8{
+    "ascii/classify.c",
     "char/ft_is_things.c",
     "char/ft_to_upper_to_lower.c",
     "collections/hash_map.c",
@@ -114,19 +115,9 @@ const source_files = [_][]const u8{
     "memory/ft_memset.c",
     "reader/reader.c",
     "reader/scan.c",
-    "slice/str.c",
-    "string/ft_split.c",
-    "string/ft_strchr.c",
-    "string/ft_strdup.c",
-    "string/ft_striteri.c",
-    "string/ft_strjoin.c",
-    "string/ft_strlcat.c",
-    "string/ft_strlcpy.c",
-    "string/ft_strlen.c",
-    "string/ft_strmapi.c",
-    "string/ft_strncmp.c",
-    "string/ft_strnstr.c",
-    "string/ft_strrchr.c",
-    "string/ft_strtrim.c",
-    "string/ft_substr.c",
+    "str/basic.c",
+    "str/compare.c",
+    "str/find.c",
+    "str/split.c",
+    "str/trim.c",
 };

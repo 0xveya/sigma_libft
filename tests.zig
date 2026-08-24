@@ -29,14 +29,6 @@ fn cString(ptr: [*c]u8) []u8 {
 
 fn noopDelete(_: ?*anyopaque) callconv(.c) void {}
 
-fn incrementByte(_: c_uint, byte: [*c]u8) callconv(.c) void {
-    byte.* += 1;
-}
-
-fn incrementMapped(_: c_uint, byte: u8) callconv(.c) u8 {
-    return byte + 1;
-}
-
 var iter_count: usize = 0;
 fn countNode(_: ?*anyopaque) callconv(.c) void {
     iter_count += 1;
@@ -67,7 +59,6 @@ test "memory primitives handle exact byte ranges" {
 
     _ = c.ft_memset(&destination[1], 0xaa, 3);
     try std.testing.expectEqualSlices(u8, &.{ 1, 0xaa, 0xaa, 0xaa, 5 }, &destination);
-    try std.testing.expectEqual(@as(usize, 5), c.ft_strlen("hello"));
 }
 
 test "SIMD memory paths preserve guards and tails" {
@@ -87,18 +78,13 @@ test "SIMD memory paths preserve guards and tails" {
     try std.testing.expectEqual(@as(u8, source[192]), destination[194]);
 }
 
-test "SIMD strlen handles unaligned long strings" {
-    const text = "x" ++ ("0123456789abcdef" ** 8);
-    try std.testing.expectEqual(@as(usize, text.len - 1), c.ft_strlen(text.ptr + 1));
-}
-
 test "string map grows and retrieves values" {
     var map: c.sigma_str_map = undefined;
     try std.testing.expect(c.sigma_str_map_init(&map, testAllocator(), 0));
     defer c.sigma_str_map_deinit(&map);
 
-    const key = c.sigma_str_from_cstr("project");
-    const value = c.sigma_str_from_cstr("sigma_libft");
+    const key = c.str_from_cstr("project");
+    const value = c.str_from_cstr("sigma_libft");
     try std.testing.expect(c.sigma_str_map_put(&map, key, value));
     const found = c.sigma_str_map_get(&map, key);
     try std.testing.expect(found != null);
@@ -213,98 +199,6 @@ test "ft_memset" {
     try std.testing.expectEqualSlices(u8, &([_]u8{0xa5} ** 65), &bytes);
 }
 
-test "ft_split" {
-    const parts = c.ft_split("::one:two::", ':');
-    try std.testing.expect(parts != null);
-    defer {
-        var index: usize = 0;
-        while (parts[index] != null) : (index += 1) std.c.free(parts[index]);
-        std.c.free(@ptrCast(parts));
-    }
-    try std.testing.expectEqualStrings("one", cString(parts[0]));
-    try std.testing.expectEqualStrings("two", cString(parts[1]));
-    try std.testing.expect(parts[2] == null);
-}
-
-test "ft_strchr" {
-    const found = c.ft_strchr("abc", 'b');
-    try std.testing.expect(found != null);
-    try std.testing.expectEqualStrings("bc", cString(found));
-}
-
-test "ft_strdup" {
-    const duplicate = c.ft_strdup("hello");
-    try std.testing.expect(duplicate != null);
-    defer std.c.free(duplicate);
-    try std.testing.expectEqualStrings("hello", cString(duplicate));
-}
-
-test "ft_striteri" {
-    var text = [_:0]u8{ 'a', 'b', 'c' };
-    c.ft_striteri(&text, incrementByte);
-    try std.testing.expectEqualSlices(u8, "bcd", text[0..3]);
-}
-
-test "ft_strjoin" {
-    const joined = c.ft_strjoin("sigma_", "libft");
-    try std.testing.expect(joined != null);
-    defer std.c.free(joined);
-    try std.testing.expectEqualStrings("sigma_libft", cString(joined));
-}
-
-test "ft_strlcat" {
-    var dst = [_:0]u8{ 'a', 'b', 0, 0, 0, 0, 0, 0 };
-    try std.testing.expectEqual(@as(usize, 4), c.ft_strlcat(&dst, "cd", dst.len));
-    try std.testing.expectEqualStrings("abcd", cString(&dst));
-}
-
-test "ft_strlcpy" {
-    var dst = [_]u8{0} ** 4;
-    try std.testing.expectEqual(@as(usize, 5), c.ft_strlcpy(&dst, "hello", dst.len));
-    try std.testing.expectEqualSlices(u8, "hel\x00", &dst);
-}
-
-test "ft_strlen" {
-    try std.testing.expectEqual(@as(usize, 128), c.ft_strlen("x" ** 128));
-}
-
-test "ft_strmapi" {
-    const mapped = c.ft_strmapi("abc", incrementMapped);
-    try std.testing.expect(mapped != null);
-    defer std.c.free(mapped);
-    try std.testing.expectEqualStrings("bcd", cString(mapped));
-}
-
-test "ft_strncmp" {
-    try std.testing.expect(c.ft_strncmp("abc", "abd", 3) < 0);
-}
-
-test "ft_strnstr" {
-    const found = c.ft_strnstr("hello world", "world", 11);
-    try std.testing.expect(found != null);
-    try std.testing.expectEqualStrings("world", cString(found));
-}
-
-test "ft_strrchr" {
-    const found = c.ft_strrchr("abca", 'a');
-    try std.testing.expect(found != null);
-    try std.testing.expectEqualStrings("a", cString(found));
-}
-
-test "ft_strtrim" {
-    const trimmed = c.ft_strtrim("  hello  ", " ");
-    try std.testing.expect(trimmed != null);
-    defer std.c.free(trimmed);
-    try std.testing.expectEqualStrings("hello", cString(trimmed));
-}
-
-test "ft_substr" {
-    const substring = c.ft_substr("hello", 1, 3);
-    try std.testing.expect(substring != null);
-    defer std.c.free(substring);
-    try std.testing.expectEqualStrings("ell", cString(substring));
-}
-
 test "ft_lstnew" {
     var value: c_int = 42;
     const node = c.ft_lstnew(&value);
@@ -402,19 +296,63 @@ test "ft_printf" {
     try std.testing.expectEqualStrings("value=42 ok", buffer[0..@intCast(count)]);
 }
 
-test "sigma_str_from_cstr" {
-    const string = c.sigma_str_from_cstr("hello");
-    try std.testing.expectEqual(@as(usize, 5), string.len);
+test "str converts from and to C strings" {
+    const string = c.str_from_cstr("hello");
+    try std.testing.expectEqualSlices(u8, "hello", string.items[0..string.len]);
+
+    const bytes = [_]u8{ 'a', 0, 'b' };
+    allocation_count = 0;
+    const converted = c.str_to_cstr(.{ .items = &bytes, .len = bytes.len }, testAllocator());
+    try std.testing.expect(converted != null);
+    defer testFree(null, converted, bytes.len + 1, @alignOf(std.c.max_align_t));
+    try std.testing.expectEqual(@as(usize, 1), allocation_count);
+    try std.testing.expectEqualSlices(u8, &.{ 'a', 0, 'b', 0 }, converted[0 .. bytes.len + 1]);
 }
 
-test "sigma_str_eq" {
-    try std.testing.expect(c.sigma_str_eq(c.sigma_str_from_cstr("same"), c.sigma_str_from_cstr("same")));
-    try std.testing.expect(!c.sigma_str_eq(c.sigma_str_from_cstr("same"), c.sigma_str_from_cstr("other")));
+test "str slices and compares bounded contents" {
+    const string = c.str_from_cstr("alphabet");
+    try std.testing.expect(!c.str_is_empty(string));
+    try std.testing.expect(c.str_is_empty(c.str_sub(string, string.len, 10)));
+    try std.testing.expectEqualSlices(u8, "pha", c.str_sub(string, 2, 3).items[0..3]);
+    try std.testing.expectEqualSlices(u8, "bet", c.str_sub(string, 5, 99).items[0..3]);
+    try std.testing.expect(c.str_eq(c.str_from_cstr("same"), c.str_from_cstr("same")));
+    try std.testing.expect(!c.str_eq(c.str_from_cstr("same"), c.str_from_cstr("other")));
+    try std.testing.expect(c.str_cmp(c.str_from_cstr("abc"), c.str_from_cstr("abd")) < 0);
+    try std.testing.expect(c.str_cmp(c.str_from_cstr("abc"), c.str_from_cstr("ab")) > 0);
+    try std.testing.expect(c.str_starts_with(string, c.str_from_cstr("alpha")));
+    try std.testing.expect(c.str_ends_with(string, c.str_from_cstr("bet")));
+}
+
+test "str finds bytes and trims ASCII whitespace" {
+    const string = c.str_from_cstr("abca");
+    try std.testing.expectEqual(@as(usize, 0), c.str_find_byte(string, 'a'));
+    try std.testing.expectEqual(@as(usize, 3), c.str_rfind_byte(string, 'a'));
+    try std.testing.expectEqual(@as(usize, c.STR_NPOS), c.str_find_byte(string, 'x'));
+
+    const spaced = c.str_from_cstr(" \t hello \r\n");
+    const start = c.str_trim_start_ascii(spaced);
+    const end = c.str_trim_end_ascii(spaced);
+    const both = c.str_trim_ascii(spaced);
+    try std.testing.expectEqualSlices(u8, "hello \r\n", start.items[0..start.len]);
+    try std.testing.expectEqualSlices(u8, " \t hello", end.items[0..end.len]);
+    try std.testing.expectEqualSlices(u8, "hello", both.items[0..both.len]);
+}
+
+test "str scalar split preserves empty fields" {
+    var iterator = c.str_split_scalar(c.str_from_cstr("a::b:"), ':');
+    var part: c.str_t = undefined;
+    const expected = [_][]const u8{ "a", "", "b", "" };
+
+    for (expected) |value| {
+        try std.testing.expect(c.str_split_scalar_next(&iterator, &part));
+        try std.testing.expectEqualSlices(u8, value, part.items[0..part.len]);
+    }
+    try std.testing.expect(!c.str_split_scalar_next(&iterator, &part));
 }
 
 test "sigma_str_hash" {
-    const left = c.sigma_str_hash(c.sigma_str_from_cstr("left"));
-    const right = c.sigma_str_hash(c.sigma_str_from_cstr("right"));
+    const left = c.sigma_str_hash(c.str_from_cstr("left"));
+    const right = c.sigma_str_hash(c.str_from_cstr("right"));
     try std.testing.expect(left != right);
 }
 
@@ -430,15 +368,15 @@ test "sigma_str_map_put" {
     var map: c.sigma_str_map = undefined;
     try std.testing.expect(c.sigma_str_map_init(&map, testAllocator(), 0));
     defer c.sigma_str_map_deinit(&map);
-    try std.testing.expect(c.sigma_str_map_put(&map, c.sigma_str_from_cstr("key"), c.sigma_str_from_cstr("value")));
+    try std.testing.expect(c.sigma_str_map_put(&map, c.str_from_cstr("key"), c.str_from_cstr("value")));
 }
 
 test "sigma_str_map_get" {
     var map: c.sigma_str_map = undefined;
     try std.testing.expect(c.sigma_str_map_init(&map, testAllocator(), 0));
     defer c.sigma_str_map_deinit(&map);
-    const key = c.sigma_str_from_cstr("key");
-    try std.testing.expect(c.sigma_str_map_put(&map, key, c.sigma_str_from_cstr("value")));
+    const key = c.str_from_cstr("key");
+    try std.testing.expect(c.sigma_str_map_put(&map, key, c.str_from_cstr("value")));
     try std.testing.expect(c.sigma_str_map_get(&map, key) != null);
 }
 
@@ -446,8 +384,8 @@ test "sigma_str_map_has" {
     var map: c.sigma_str_map = undefined;
     try std.testing.expect(c.sigma_str_map_init(&map, testAllocator(), 0));
     defer c.sigma_str_map_deinit(&map);
-    const key = c.sigma_str_from_cstr("key");
-    try std.testing.expect(c.sigma_str_map_put(&map, key, c.sigma_str_from_cstr("value")));
+    const key = c.str_from_cstr("key");
+    try std.testing.expect(c.sigma_str_map_put(&map, key, c.str_from_cstr("value")));
     try std.testing.expect(c.sigma_str_map_has(&map, key));
 }
 

@@ -13,7 +13,7 @@ int ft_print_str_fmt(t_writer *w, const char *s, t_format *f) {
 
   if (!s)
     s = "(null)";
-  len = (int)ft_strlen(s);
+  len = (int)str_from_cstr(s).len;
   if (f->precision >= 0 && f->precision < len)
     len = f->precision;
   pad = f->width - len;
