@@ -14,6 +14,14 @@ static void memset_scalar(u8 *dst, u8 byte, usize size) {
 
 static void memset_sse2(u8 *dst, u8 byte, usize size) {
   __m128i value = _mm_set1_epi8((char)byte);
+  while (size >= 64) {
+    _mm_storeu_si128((__m128i *)(dst + 0), value);
+    _mm_storeu_si128((__m128i *)(dst + 16), value);
+    _mm_storeu_si128((__m128i *)(dst + 32), value);
+    _mm_storeu_si128((__m128i *)(dst + 48), value);
+    dst += 64;
+    size -= 64;
+  }
   while (size >= 16) {
     _mm_storeu_si128((__m128i *)dst, value);
     dst += 16;
@@ -26,6 +34,14 @@ static void memset_sse2(u8 *dst, u8 byte, usize size) {
 [[gnu::target("avx2")]]
 static void memset_avx2(u8 *dst, u8 byte, usize size) {
   __m256i value = _mm256_set1_epi8((char)byte);
+  while (size >= 128) {
+    _mm256_storeu_si256((__m256i *)(dst + 0), value);
+    _mm256_storeu_si256((__m256i *)(dst + 32), value);
+    _mm256_storeu_si256((__m256i *)(dst + 64), value);
+    _mm256_storeu_si256((__m256i *)(dst + 96), value);
+    dst += 128;
+    size -= 128;
+  }
   while (size >= 32) {
     _mm256_storeu_si256((__m256i *)dst, value);
     dst += 32;

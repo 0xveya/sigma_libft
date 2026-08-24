@@ -16,10 +16,11 @@ description = "run the Zig tests"
 run = "zig build test"
 
 [tasks."test:simd"]
-description = "run tests through scalar, SSE2, and automatic SIMD routing"
+description = "run tests through scalar, SSE2, AVX2, and automatic SIMD routing"
 run = [
   "zig build test -Dsimd=scalar",
   "zig build test -Dsimd=sse2",
+  "zig build test -Dsimd=avx2",
   "zig build test -Dsimd=auto",
 ]
 

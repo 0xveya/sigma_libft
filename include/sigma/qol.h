@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define var auto
+#define SIGMA_NPOS ((usize) - 1)
 
 typedef size_t usize;
 typedef ptrdiff_t isize;

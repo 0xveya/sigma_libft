@@ -24,7 +24,7 @@ externals: allocator.alloc
 kind: function
 */
 char *str_to_cstr(str_t s, allocator_t allocator) {
-  if (s.len == STR_NPOS)
+  if (s.len == SIGMA_NPOS)
     return NULL;
 
   char *result = allocator_array(allocator, char, s.len + 1);

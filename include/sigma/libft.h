@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sigma/attributes.h>
+#include <sigma/bytes.h>
 #include <sigma/char.h>
 #include <sigma/conversion.h>
 #include <sigma/io.h>

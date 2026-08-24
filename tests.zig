@@ -327,7 +327,7 @@ test "str finds bytes and trims ASCII whitespace" {
     const string = c.str_from_cstr("abca");
     try std.testing.expectEqual(@as(usize, 0), c.str_find_byte(string, 'a'));
     try std.testing.expectEqual(@as(usize, 3), c.str_rfind_byte(string, 'a'));
-    try std.testing.expectEqual(@as(usize, c.STR_NPOS), c.str_find_byte(string, 'x'));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.str_find_byte(string, 'x'));
 
     const spaced = c.str_from_cstr(" \t hello \r\n");
     const start = c.str_trim_start_ascii(spaced);
@@ -348,6 +348,79 @@ test "str scalar split preserves empty fields" {
         try std.testing.expectEqualSlices(u8, value, part.items[0..part.len]);
     }
     try std.testing.expect(!c.str_split_scalar_next(&iterator, &part));
+}
+
+test "bytes slices immutable and mutable views" {
+    const source = [_]u8{ 0, 1, 2, 3 };
+    const bytes: c.bytes_t = .{ .items = &source, .len = source.len };
+    try std.testing.expect(!c.bytes_is_empty(bytes));
+    try std.testing.expect(c.bytes_is_empty(.{ .items = null, .len = 0 }));
+
+    const middle = c.bytes_sub(bytes, 1, 2);
+    try std.testing.expectEqualSlices(u8, &.{ 1, 2 }, middle.items[0..middle.len]);
+    const clamped = c.bytes_sub(bytes, 99, 99);
+    try std.testing.expectEqual(@as(usize, 0), clamped.len);
+
+    const empty = c.bytes_sub(.{ .items = null, .len = 0 }, 0, 1);
+    try std.testing.expectEqual(@as(usize, 0), empty.len);
+    try std.testing.expect(empty.items == null);
+
+    var mutable_source = [_]u8{ 4, 5, 6 };
+    const mutable = c.bytes_mut_sub(.{ .items = &mutable_source, .len = mutable_source.len }, 1, 1);
+    mutable.items[0] = 9;
+    try std.testing.expectEqual(@as(u8, 9), mutable_source[1]);
+}
+
+test "bytes compares bounded contents" {
+    const low = [_]u8{ 0, 0xff };
+    const high = [_]u8{ 0, 0 };
+    const low_bytes: c.bytes_t = .{ .items = &low, .len = low.len };
+    const high_bytes: c.bytes_t = .{ .items = &high, .len = high.len };
+
+    try std.testing.expect(c.bytes_eq(low_bytes, low_bytes));
+    try std.testing.expect(!c.bytes_eq(low_bytes, high_bytes));
+    try std.testing.expect(c.bytes_cmp(low_bytes, high_bytes) > 0);
+    try std.testing.expect(c.bytes_cmp(.{ .items = null, .len = 0 }, .{ .items = null, .len = 0 }) == 0);
+}
+
+test "bytes finds values within bounds" {
+    const source = [_]u8{ 7, 8, 7, 9 };
+    const bytes: c.bytes_t = .{ .items = &source, .len = source.len };
+
+    try std.testing.expectEqual(@as(usize, 0), c.bytes_find(bytes, 7));
+    try std.testing.expectEqual(@as(usize, 2), c.bytes_rfind(bytes, 7));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.bytes_find(bytes, 6));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.bytes_rfind(.{ .items = null, .len = 0 }, 0));
+}
+
+test "modern memory primitives stay within bounds" {
+    const left = [_]u8{ 1, 2, 3, 4 };
+    const right = [_]u8{ 1, 2, 4, 0 };
+
+    try std.testing.expectEqual(@as(usize, 2), c.mem_find(&left, 3, 3));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.mem_find(&left, 2, 3));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.mem_find(null, 0, 0));
+    try std.testing.expect(c.mem_cmp(&left, &right, 2) == 0);
+    try std.testing.expect(c.mem_cmp(&left, &right, 3) < 0);
+    try std.testing.expect(c.mem_cmp(null, null, 0) == 0);
+}
+
+test "SIMD find and compare handle vector boundaries and tails" {
+    var left = [_]u8{0x5a} ** 257;
+    var right: [257]u8 = undefined;
+    right = left;
+
+    const boundaries = [_]usize{ 0, 15, 16, 31, 32, 63, 64, 127, 128, 255, 256 };
+    for (boundaries) |index| {
+        const original = right[index];
+        right[index] +%= 1;
+        try std.testing.expect(c.mem_cmp(&left, &right, left.len) < 0);
+        right[index] = original;
+    }
+
+    left[256] = 0xff;
+    try std.testing.expectEqual(@as(usize, 256), c.mem_find(&left, left.len, 0xff));
+    try std.testing.expectEqual(@as(usize, c.SIGMA_NPOS), c.mem_find(&left, 256, 0xff));
 }
 
 test "sigma_str_hash" {

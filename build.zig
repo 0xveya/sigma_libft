@@ -12,13 +12,13 @@ const c_flags = [_][]const u8{
     "-Wundef",
 };
 
-const Simd = enum { auto, scalar, sse2 };
+const Simd = enum { auto, scalar, sse2, avx2 };
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const sigma_malloc = b.dependency("sigma_malloc", .{});
-    const simd = b.option(Simd, "simd", "Select SIMD dispatch: auto, scalar, or sse2") orelse .auto;
+    const simd = b.option(Simd, "simd", "Select SIMD dispatch: auto, scalar, sse2, or avx2") orelse .auto;
 
     const lib = b.addLibrary(.{
         .name = "sigma_libft",
@@ -69,6 +69,7 @@ fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build
         .auto => {},
         .scalar => module.addCMacro("SIGMA_SIMD_FORCE_SCALAR", "1"),
         .sse2 => module.addCMacro("SIGMA_SIMD_FORCE_SSE2", "1"),
+        .avx2 => module.addCMacro("SIGMA_SIMD_FORCE_AVX2", "1"),
     }
     module.addCSourceFiles(.{
         .root = b.path("src"),
@@ -79,6 +80,9 @@ fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build
 
 const source_files = [_][]const u8{
     "ascii/classify.c",
+    "bytes/basic.c",
+    "bytes/compare.c",
+    "bytes/find.c",
     "char/ft_is_things.c",
     "char/ft_to_upper_to_lower.c",
     "collections/hash_map.c",
@@ -113,6 +117,8 @@ const source_files = [_][]const u8{
     "memory/ft_memcpy.c",
     "memory/ft_memmove.c",
     "memory/ft_memset.c",
+    "memory/cmp.c",
+    "memory/find.c",
     "reader/reader.c",
     "reader/scan.c",
     "str/basic.c",

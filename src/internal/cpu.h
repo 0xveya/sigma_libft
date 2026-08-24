@@ -14,6 +14,8 @@ static inline sigma_simd_level sigma_cpu_simd_level(void) {
   return sigma_simd_scalar;
 #elif defined(SIGMA_SIMD_FORCE_SSE2)
   return sigma_simd_sse2;
+#elif defined(SIGMA_SIMD_FORCE_AVX2)
+  return sigma_simd_avx2;
 #else
   unsigned int eax;
   unsigned int ebx;

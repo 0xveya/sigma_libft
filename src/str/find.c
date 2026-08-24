@@ -1,35 +1,23 @@
-#include <sigma/qol.h>
 #include <sigma/str.h>
 
 /* sigma:begin
 name: libft.str.find.str_find_byte
 provides: str.find_byte
-deps:
+deps: bytes.find, str.bytes
 externals:
 kind: function
 */
-usize str_find_byte(str_t s, u8 byte) {
-  for (usize i = 0; i < s.len; i++) {
-    if ((u8)s.items[i] == byte)
-      return i;
-  }
-  return STR_NPOS;
-}
+usize str_find_byte(str_t s, u8 byte) { return bytes_find(str_bytes(s), byte); }
 /* sigma:end */
 
 /* sigma:begin
 name: libft.str.find.str_rfind_byte
 provides: str.rfind_byte
-deps:
+deps: bytes.rfind, str.bytes
 externals:
 kind: function
 */
 usize str_rfind_byte(str_t s, u8 byte) {
-  for (usize i = s.len; i > 0; i--) {
-    if ((u8)s.items[i - 1] == byte)
-      return i - 1;
-  }
-
-  return STR_NPOS;
+  return bytes_rfind(str_bytes(s), byte);
 }
 /* sigma:end */

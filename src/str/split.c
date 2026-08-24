@@ -29,7 +29,7 @@ bool str_split_scalar_next(str_split_scalar_t *it, str_t *out) {
 
   usize pos = str_find_byte(it->remaining, it->delimiter);
 
-  if (pos == STR_NPOS) {
+  if (pos == SIGMA_NPOS) {
     *out = it->remaining;
     it->remaining = (str_t){0};
     it->finished = true;
