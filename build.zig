@@ -62,6 +62,10 @@ pub fn build(b: *std.Build) void {
         .file = b.path("tests/vec_fixture.c"),
         .flags = &c_flags,
     });
+    tests.root_module.addCSourceFile(.{
+        .file = b.path("tests/string_fixture.c"),
+        .flags = &c_flags,
+    });
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 }
 
@@ -131,4 +135,5 @@ const source_files = [_][]const u8{
     "str/find.c",
     "str/split.c",
     "str/trim.c",
+    "string/string.c",
 };

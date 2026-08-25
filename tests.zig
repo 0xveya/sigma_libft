@@ -2,6 +2,7 @@ const std = @import("std");
 const c = @import("c");
 
 extern fn sigma_test_vec_codegen() bool;
+extern fn sigma_test_string_ownership() bool;
 
 var allocation_count: usize = 0;
 var free_count: usize = 0;
@@ -42,6 +43,10 @@ fn identityContent(content: ?*anyopaque) callconv(.c) ?*anyopaque {
 
 test "vector codegen preserves ownership contracts" {
     try std.testing.expect(sigma_test_vec_codegen());
+}
+
+test "owned strings and string vectors preserve ownership contracts" {
+    try std.testing.expect(sigma_test_string_ownership());
 }
 
 test "parse i32 distinguishes valid, invalid, and overflow input" {
