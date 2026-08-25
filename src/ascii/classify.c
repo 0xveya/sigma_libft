@@ -20,7 +20,7 @@
       .upper = SIGMA_ASCII_UPPER_FOR(c),                                       \
   },
 
-static const sigma_ascii_info_t sigma_ascii_table[128] = {
+static constexpr sigma_ascii_info_t sigma_ascii_table[128] = {
     SIGMA_REPEAT_128(SIGMA_ASCII_ENTRY, _, 0)};
 
 #define SIGMA_DEFINE_ASCII_PRED(name, mask)                                    \
