@@ -31,8 +31,11 @@ typedef struct sigma_line_reader {
   allocator_arena_t arena;
 } sigma_line_reader;
 
+/* Initializes reader for fd; the reader borrows the descriptor. */
 void sigma_line_reader_init(sigma_line_reader *reader, i32 fd,
                             allocator_t allocator);
+/* Releases reader-owned buffers without closing its borrowed descriptor. */
 void sigma_line_reader_deinit(sigma_line_reader *reader);
+/* Returns the next line view or an explicit EOF, I/O, or allocation result. */
 SIGMA_NODISCARD sigma_line_result
 sigma_line_reader_next(sigma_line_reader *reader);
