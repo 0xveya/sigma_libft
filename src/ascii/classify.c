@@ -10,9 +10,9 @@
 #define SIGMA_ASCII_FLAGS_FOR(c)                                               \
   (0 SIGMA_ASCII_RULES(SIGMA_ASCII_RANGE, SIGMA_ASCII_ONE, c))
 #define SIGMA_ASCII_LOWER_FOR(c)                                               \
-  (((c) >= 'A' && (c) <= 'Z') ? ((c) + ('a' - 'A')) : (c))
+  (((c) >= 'A' && (c) <= 'Z') ? (u8)((c) + ('a' - 'A')) : (u8)(c))
 #define SIGMA_ASCII_UPPER_FOR(c)                                               \
-  (((c) >= 'a' && (c) <= 'z') ? ((c) - ('a' - 'A')) : (c))
+  (((c) >= 'a' && (c) <= 'z') ? (u8)((c) - ('a' - 'A')) : (u8)(c))
 #define SIGMA_ASCII_ENTRY(_, c)                                                \
   {                                                                            \
       .flags = SIGMA_ASCII_FLAGS_FOR(c),                                       \

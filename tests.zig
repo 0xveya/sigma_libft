@@ -154,6 +154,31 @@ test "ASCII table classifies and converts every byte" {
     }
 }
 
+test "Unicode database classifies and maps representative runes" {
+    const lambda = c.sigma_rune_from_u32(0x03bb);
+    const greek_upper = c.sigma_rune_from_u32(0x039b);
+    const arabic_digit = c.sigma_rune_from_u32(0x0665);
+    const no_break_space = c.sigma_rune_from_u32(0x00a0);
+    const control = c.sigma_rune_from_u32(0x000a);
+    const fullwidth_hex = c.sigma_rune_from_u32(0xff21);
+    const emoji = c.sigma_rune_from_u32(0x1f642);
+    const surrogate = c.sigma_rune_from_u32(0xd800);
+
+    try std.testing.expect(c.sigma_rune_is_alpha(lambda));
+    try std.testing.expect(c.sigma_rune_is_lower(lambda));
+    try std.testing.expect(c.sigma_rune_is_upper(greek_upper));
+    try std.testing.expect(c.sigma_rune_is_digit(arabic_digit));
+    try std.testing.expect(c.sigma_rune_is_alnum(arabic_digit));
+    try std.testing.expect(c.sigma_rune_is_space(no_break_space));
+    try std.testing.expect(c.sigma_rune_is_cntrl(control));
+    try std.testing.expect(c.sigma_rune_is_xdigit(fullwidth_hex));
+    try std.testing.expect(c.sigma_rune_is_print(emoji));
+    try std.testing.expect(!c.sigma_rune_is_alpha(surrogate));
+    try std.testing.expectEqual(lambda.value, c.sigma_rune_to_lower(greek_upper).value);
+    try std.testing.expectEqual(greek_upper.value, c.sigma_rune_to_upper(lambda).value);
+    try std.testing.expectEqual(surrogate.value, c.sigma_rune_to_lower(surrogate).value);
+}
+
 test "ft_atoi" {
     try std.testing.expectEqual(@as(c_int, -42), c.ft_atoi("-42"));
 }

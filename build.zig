@@ -5,6 +5,7 @@ const c_flags = [_][]const u8{
     "-Wall",
     "-Wextra",
     "-Wpedantic",
+    "-pedantic-errors",
     "-Wshadow",
     "-Wconversion",
     "-Wdouble-promotion",
@@ -134,4 +135,5 @@ const source_files = [_][]const u8{
     "str/split.c",
     "str/trim.c",
     "string/string.c",
+    "unicode/unicode.c",
 };

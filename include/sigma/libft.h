@@ -14,6 +14,7 @@
 #include <sigma/string.h>
 #include <sigma/string_vec.h>
 #include <sigma/traits.h>
+#include <sigma/unicode.h>
 #include <sigma/vec.h>
 #include <stdlib.h>
 #include <unistd.h>
