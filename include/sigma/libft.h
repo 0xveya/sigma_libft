@@ -7,9 +7,11 @@
 #include <sigma/io.h>
 #include <sigma/list.h>
 #include <sigma/mem.h>
+#include <sigma/ownership.h>
 #include <sigma/qol.h>
 #include <sigma/slice.h>
 #include <sigma/str.h>
+#include <sigma/vec.h>
 #include <stdlib.h>
 #include <unistd.h>
 

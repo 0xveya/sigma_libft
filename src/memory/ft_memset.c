@@ -65,8 +65,8 @@ static memset_fn select_memset(void) {
 
 /* sigma:begin
 name: libft.memory.ft_memset.ft_memset
-provides: mem.set
-deps:
+provides: libft.ft_memset
+deps: cpu.simd_level
 externals:
 kind: function
 */

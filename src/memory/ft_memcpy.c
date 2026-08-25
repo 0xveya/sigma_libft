@@ -77,8 +77,8 @@ static memcpy_fn select_memcpy(void) {
 
 /* sigma:begin
 name: libft.memory.ft_memcpy.ft_memcpy
-provides: mem.copy
-deps:
+provides: libft.ft_memcpy
+deps: cpu.simd_level
 externals:
 kind: function
 */

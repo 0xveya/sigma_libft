@@ -58,6 +58,10 @@ pub fn build(b: *std.Build) void {
     });
     tests.use_llvm = true;
     configureC(b, tests.root_module, sigma_malloc, simd);
+    tests.root_module.addCSourceFile(.{
+        .file = b.path("tests/vec_fixture.c"),
+        .flags = &c_flags,
+    });
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 }
 
@@ -118,6 +122,7 @@ const source_files = [_][]const u8{
     "memory/ft_memmove.c",
     "memory/ft_memset.c",
     "memory/cmp.c",
+    "memory/copy.c",
     "memory/find.c",
     "reader/reader.c",
     "reader/scan.c",

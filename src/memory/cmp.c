@@ -112,8 +112,8 @@ static mem_cmp_fn select_mem_cmp(void) {
 /* sigma:begin
 name: libft.memory.cmp.mem_cmp
 provides: mem.cmp
-deps:
-externals: cpuid
+deps: cpu.simd_level
+externals:
 kind: function
 */
 i32 mem_cmp(const void *a, const void *b, usize len) {

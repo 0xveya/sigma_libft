@@ -106,8 +106,8 @@ static mem_find_fn select_mem_find(void) {
 /* sigma:begin
 name: libft.memory.find.mem_find
 provides: mem.find
-deps:
-externals: cpuid
+deps: cpu.simd_level
+externals:
 kind: function
 */
 usize mem_find(const void *ptr, usize len, u8 value) {
