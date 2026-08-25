@@ -127,6 +127,12 @@
                                                                                \
   static inline void Name##_clear(Name *vec) { vec->len = 0; }
 
+/* Documents that generated elements are trivial values. */
+#define SIGMA_VEC_DEFINE_TRIVIAL(T, Name) SIGMA_VEC_DEFINE(T, Name)
+
+/* Documents that generated elements borrow resources owned elsewhere. */
+#define SIGMA_VEC_DEFINE_BORROWED(T, Name) SIGMA_VEC_DEFINE(T, Name)
+
 /*
  * Defines a vector that owns every inserted element.
  *
@@ -138,7 +144,7 @@
  * clear and deinit destroy every remaining element. take transfers the whole
  * vector and resets its source to {0}.
  */
-#define SIGMA_VEC_DEFINE_OWNED(T, Name, deinit_fn)                             \
+#define SIGMA_VEC_DEFINE_OWNED(T, Name, clone_fn, deinit_fn)                   \
   typedef struct {                                                             \
     T *items;                                                                  \
     usize len;                                                                 \
@@ -219,6 +225,24 @@
                              _Alignof(T));                                     \
                                                                                \
     *vec = (Name){0};                                                          \
+  }                                                                            \
+                                                                               \
+  static inline bool Name##_clone(Name *out, const Name *src) {                \
+    Name result = Name##_init(src->allocator);                                 \
+                                                                               \
+    if (!Name##_reserve(&result, src->len))                                    \
+      return false;                                                            \
+                                                                               \
+    for (usize i = 0; i < src->len; ++i) {                                     \
+      if (!clone_fn(&result.items[i], &src->items[i])) {                       \
+        Name##_deinit(&result);                                                \
+        return false;                                                          \
+      }                                                                        \
+      ++result.len;                                                            \
+    }                                                                          \
+                                                                               \
+    *out = result;                                                             \
+    return true;                                                               \
   }                                                                            \
                                                                                \
   static inline Name Name##_take(Name *src) {                                  \

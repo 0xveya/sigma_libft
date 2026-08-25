@@ -110,7 +110,7 @@ bool string_append_char(string_t *string, char c) {
   return true;
 }
 
-bool string_clone(allocator_t allocator, str_t source, string_t *out) {
+bool string_from_str(string_t *out, allocator_t allocator, str_t source) {
   string_t result = string_init(allocator);
 
   if (source.len != 0) {
@@ -125,4 +125,8 @@ bool string_clone(allocator_t allocator, str_t source, string_t *out) {
   *out = result;
 
   return true;
+}
+
+bool string_clone(string_t *out, const string_t *source) {
+  return string_from_str(out, source->allocator, string_view(source));
 }

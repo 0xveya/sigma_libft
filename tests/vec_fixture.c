@@ -70,8 +70,14 @@ static void owned_int_deinit(owned_int_t *value) {
   *value = (owned_int_t){0};
 }
 
-SIGMA_VEC_DEFINE(i32, test_i32_vec)
-SIGMA_VEC_DEFINE_OWNED(owned_int_t, test_owned_vec, owned_int_deinit)
+static bool owned_int_clone(owned_int_t *out, const owned_int_t *source) {
+  *out = owned_int_init(*source->ptr, source->deinit_count);
+  return out->ptr != NULL;
+}
+
+SIGMA_VEC_DEFINE_TRIVIAL(i32, test_i32_vec)
+SIGMA_VEC_DEFINE_OWNED(owned_int_t, test_owned_vec, owned_int_clone,
+                       owned_int_deinit)
 
 static bool test_trivial_vec(allocator_t allocator) {
   test_i32_vec source = test_i32_vec_init(allocator);

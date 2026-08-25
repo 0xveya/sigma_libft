@@ -11,4 +11,4 @@
  * vector. The complete generated API and its contracts are documented by
  * SIGMA_VEC_DEFINE_OWNED in <sigma/vec.h>.
  */
-SIGMA_VEC_DEFINE_OWNED(string_t, string_vec, string_deinit)
+SIGMA_VEC_DEFINE_OWNED(string_t, string_vec, string_clone, string_deinit)

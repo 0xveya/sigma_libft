@@ -57,12 +57,15 @@ bool string_append_char(string_t *string, char c);
 /* Removes all characters while retaining the backing allocation. */
 void string_clear(string_t *string);
 
-/* Explicit allocation/copy */
+/* Explicit allocation and copy */
 
 /*
- * Allocates and copies source into an empty or uninitialized out value.
+ * Allocates and copies source into an empty out value using allocator.
  *
  * On failure, out is untouched. out must not own a live resource because a
- * successful clone overwrites it without deinitializing it.
+ * successful copy overwrites it without deinitializing it.
  */
-bool string_clone(allocator_t allocator, str_t source, string_t *out);
+bool string_from_str(string_t *out, allocator_t allocator, str_t source);
+
+/* Clones source into an empty out value using source's allocator. */
+bool string_clone(string_t *out, const string_t *source);

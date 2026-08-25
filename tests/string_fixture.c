@@ -1,4 +1,4 @@
-#include <sigma/ownership_registry.h>
+#include <sigma/traits.h>
 
 #include <stdlib.h>
 
@@ -83,19 +83,25 @@ static bool string_test_basics(allocator_t allocator,
 static bool string_test_clone(allocator_t allocator,
                               string_test_allocator_ctx_t *ctx) {
   string_t clone = {0};
-  if (!string_clone(allocator, STR_LIT("sigma"), &clone) ||
+  if (!string_from_str(&clone, allocator, STR_LIT("sigma")) ||
       !str_eq(string_view(&clone), STR_LIT("sigma")))
+    return false;
+
+  string_t trait_clone = {0};
+  if (!sigma_clone(trait_clone, clone) ||
+      !str_eq(string_view(&trait_clone), STR_LIT("sigma")))
     return false;
 
   string_t untouched = string_init(allocator);
   ctx->fail_alloc = true;
-  if (string_clone(allocator, STR_LIT("failure"), &untouched) ||
+  if (string_from_str(&untouched, allocator, STR_LIT("failure")) ||
       untouched.items != NULL || untouched.len != 0 || untouched.cap != 0 ||
       untouched.allocator.vtable != allocator.vtable)
     return false;
   ctx->fail_alloc = false;
 
   string_deinit(&clone);
+  sigma_deinit(trait_clone);
   string_deinit(&untouched);
   return true;
 }
@@ -106,9 +112,9 @@ static bool string_test_vec(allocator_t allocator) {
   string_t second = {0};
   string_t third = {0};
 
-  if (!string_clone(allocator, STR_LIT("foo"), &first) ||
-      !string_clone(allocator, STR_LIT("bar"), &second) ||
-      !string_clone(allocator, STR_LIT("baz"), &third))
+  if (!string_from_str(&first, allocator, STR_LIT("foo")) ||
+      !string_from_str(&second, allocator, STR_LIT("bar")) ||
+      !string_from_str(&third, allocator, STR_LIT("baz")))
     return false;
 
   if (!string_vec_push_take(&strings, &first) || first.items != NULL ||
@@ -127,7 +133,15 @@ static bool string_test_vec(allocator_t allocator) {
     return false;
 
   string_deinit(&popped);
-  string_vec_deinit(&strings);
+  string_vec cloned = {0};
+  if (!sigma_clone(cloned, strings) || cloned.len != strings.len ||
+      cloned.items == strings.items ||
+      cloned.items[0].items == strings.items[0].items ||
+      !str_eq(string_view(&cloned.items[0]), STR_LIT("foo")))
+    return false;
+
+  sigma_deinit(cloned);
+  sigma_deinit(strings);
   return strings.items == NULL && strings.len == 0 && strings.cap == 0 &&
          strings.allocator.vtable == NULL;
 }
@@ -136,11 +150,11 @@ static bool string_test_registry(allocator_t allocator) {
   string_t destination = {0};
   string_t source = {0};
 
-  if (!string_clone(allocator, STR_LIT("old"), &destination) ||
-      !string_clone(allocator, STR_LIT("new"), &source))
+  if (!string_from_str(&destination, allocator, STR_LIT("old")) ||
+      !string_from_str(&source, allocator, STR_LIT("new")))
     return false;
 
-  SIGMA_REPLACE(destination, source);
+  sigma_replace(destination, source);
   if (source.items != NULL ||
       !str_eq(string_view(&destination), STR_LIT("new")))
     return false;
@@ -150,9 +164,20 @@ static bool string_test_registry(allocator_t allocator) {
       destination.items != NULL)
     return false;
 
-  SIGMA_DROP(strings);
+  sigma_deinit(strings);
   return strings.items == NULL && strings.len == 0 && strings.cap == 0 &&
          strings.allocator.vtable == NULL;
+}
+
+static bool string_test_character_traits(void) {
+  char upper = 'A';
+  signed char digit = '7';
+  unsigned char space = ' ';
+
+  return sigma_isalpha(upper) && sigma_isupper(upper) && sigma_isdigit(digit) &&
+         sigma_isalnum(digit) && sigma_isspace(space) && sigma_isprint(space) &&
+         sigma_isxdigit(upper) && sigma_tolower(upper) == 'a' &&
+         sigma_toupper((unsigned char)'z') == 'Z';
 }
 
 bool sigma_test_string_ownership(void) {
@@ -161,7 +186,7 @@ bool sigma_test_string_ownership(void) {
 
   if (!string_test_basics(allocator, &ctx) ||
       !string_test_clone(allocator, &ctx) || !string_test_vec(allocator) ||
-      !string_test_registry(allocator))
+      !string_test_registry(allocator) || !string_test_character_traits())
     return false;
 
   return ctx.allocs == ctx.frees;
