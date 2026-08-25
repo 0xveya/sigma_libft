@@ -2,6 +2,9 @@ libft remake for post cc 42 stuff where i will make a package manger for to ingr
 
 this libft is crap so far i will step by stel improve it
 
+function documentation strings are shamelessly ai generated for the better of
+everyone because thats how we get them at all and without 7 trillion typos :sob:
+
 
 todo: vector
 a ton more i cant evne think of rn

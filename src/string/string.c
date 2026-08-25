@@ -1,4 +1,5 @@
 #include <sigma/mem.h>
+#include <sigma/ownership.h>
 #include <sigma/string.h>
 #include <stdint.h>
 
@@ -44,8 +45,8 @@ void string_deinit(string_t *string) {
 }
 
 string_t string_take(string_t *source) {
-  string_t result = *source;
-  *source = (string_t){0};
+  string_t result = {0};
+  SIGMA_MOVE_PTR(&result, source);
 
   return result;
 }

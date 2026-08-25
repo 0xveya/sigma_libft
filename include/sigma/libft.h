@@ -8,6 +8,7 @@
 #include <sigma/list.h>
 #include <sigma/mem.h>
 #include <sigma/ownership.h>
+#include <sigma/ownership_registry.h>
 #include <sigma/qol.h>
 #include <sigma/slice.h>
 #include <sigma/str.h>

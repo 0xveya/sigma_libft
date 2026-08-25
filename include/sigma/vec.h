@@ -1,6 +1,7 @@
 #pragma once
 
 #include <allocator_vtable.h>
+#include <sigma/ownership.h>
 #include <sigma/qol.h>
 
 #include <stdbool.h>
@@ -45,8 +46,8 @@
   }                                                                            \
                                                                                \
   static inline Name Name##_take(Name *src) {                                  \
-    Name result = *src;                                                        \
-    *src = (Name){0};                                                          \
+    Name result = {0};                                                         \
+    SIGMA_MOVE_PTR(&result, src);                                              \
     return result;                                                             \
   }                                                                            \
                                                                                \
@@ -187,8 +188,8 @@
     if (!Name##_ensure_push(vec))                                              \
       return false;                                                            \
                                                                                \
-    vec->items[vec->len++] = *src;                                             \
-    *src = (T){0};                                                             \
+    SIGMA_MOVE_PTR(&vec->items[vec->len], src);                                \
+    ++vec->len;                                                                \
                                                                                \
     return true;                                                               \
   }                                                                            \
@@ -198,8 +199,7 @@
       return false;                                                            \
                                                                                \
     --vec->len;                                                                \
-    *out = vec->items[vec->len];                                               \
-    vec->items[vec->len] = (T){0};                                             \
+    SIGMA_MOVE_PTR(out, &vec->items[vec->len]);                                \
                                                                                \
     return true;                                                               \
   }                                                                            \
@@ -222,7 +222,7 @@
   }                                                                            \
                                                                                \
   static inline Name Name##_take(Name *src) {                                  \
-    Name result = *src;                                                        \
-    *src = (Name){0};                                                          \
+    Name result = {0};                                                         \
+    SIGMA_MOVE_PTR(&result, src);                                              \
     return result;                                                             \
   }

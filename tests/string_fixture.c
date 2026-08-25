@@ -1,4 +1,4 @@
-#include <sigma/string_vec.h>
+#include <sigma/ownership_registry.h>
 
 #include <stdlib.h>
 
@@ -132,12 +132,36 @@ static bool string_test_vec(allocator_t allocator) {
          strings.allocator.vtable == NULL;
 }
 
+static bool string_test_registry(allocator_t allocator) {
+  string_t destination = {0};
+  string_t source = {0};
+
+  if (!string_clone(allocator, STR_LIT("old"), &destination) ||
+      !string_clone(allocator, STR_LIT("new"), &source))
+    return false;
+
+  SIGMA_REPLACE(destination, source);
+  if (source.items != NULL ||
+      !str_eq(string_view(&destination), STR_LIT("new")))
+    return false;
+
+  string_vec strings = string_vec_init(allocator);
+  if (!string_vec_push_take(&strings, &destination) ||
+      destination.items != NULL)
+    return false;
+
+  SIGMA_DROP(strings);
+  return strings.items == NULL && strings.len == 0 && strings.cap == 0 &&
+         strings.allocator.vtable == NULL;
+}
+
 bool sigma_test_string_ownership(void) {
   string_test_allocator_ctx_t ctx = {0};
   allocator_t allocator = string_test_allocator(&ctx);
 
   if (!string_test_basics(allocator, &ctx) ||
-      !string_test_clone(allocator, &ctx) || !string_test_vec(allocator))
+      !string_test_clone(allocator, &ctx) || !string_test_vec(allocator) ||
+      !string_test_registry(allocator))
     return false;
 
   return ctx.allocs == ctx.frees;
