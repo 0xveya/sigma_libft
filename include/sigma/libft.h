@@ -1,8 +1,8 @@
 #pragma once
 
 #include <sigma/attributes.h>
+#include <sigma/ascii.h>
 #include <sigma/bytes.h>
-#include <sigma/char.h>
 #include <sigma/conversion.h>
 #include <sigma/io.h>
 #include <sigma/list.h>

@@ -33,7 +33,8 @@
  */
 #define SIGMA_MOVE(dst, src)                                                   \
   do {                                                                         \
-    static_assert(SIGMA_SAME_TYPE((dst), (src)), "SIGMA_MOVE: type mismatch"); \
+    _Static_assert(SIGMA_SAME_TYPE((dst), (src)),                              \
+                   "SIGMA_MOVE: type mismatch");                               \
     (dst) = (src);                                                             \
     (src) = (typeof(src)){0};                                                  \
   } while (0)
@@ -45,7 +46,8 @@
  */
 #define SIGMA_TAKE(dst, src)                                                   \
   do {                                                                         \
-    static_assert(SIGMA_SAME_TYPE((dst), (src)), "SIGMA_TAKE: type mismatch"); \
+    _Static_assert(SIGMA_SAME_TYPE((dst), (src)),                              \
+                   "SIGMA_TAKE: type mismatch");                               \
     (dst) = (src);                                                             \
     (src) = (typeof(src)){0};                                                  \
   } while (0)
@@ -59,8 +61,8 @@
  */
 #define SIGMA_MOVE_PTR(dst, src)                                               \
   do {                                                                         \
-    static_assert(SIGMA_SAME_TYPE(*(dst), *(src)),                             \
-                  "SIGMA_MOVE_PTR: type mismatch");                            \
+    _Static_assert(SIGMA_SAME_TYPE(*(dst), *(src)),                            \
+                   "SIGMA_MOVE_PTR: type mismatch");                           \
     *(dst) = *(src);                                                           \
     *(src) = (typeof(*(src))){0};                                              \
   } while (0)
@@ -73,7 +75,7 @@
  */
 #define SIGMA_SWAP(a, b)                                                       \
   do {                                                                         \
-    static_assert(SIGMA_SAME_TYPE((a), (b)), "SIGMA_SWAP: type mismatch");     \
+    _Static_assert(SIGMA_SAME_TYPE((a), (b)), "SIGMA_SWAP: type mismatch");    \
     typeof(a) sigma_swap_tmp__ = (a);                                          \
     (a) = (b);                                                                 \
     (b) = sigma_swap_tmp__;                                                    \

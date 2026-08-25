@@ -127,32 +127,31 @@ test "line reader preserves buffered lines and reports eof" {
     try std.testing.expectEqual(@as(c_uint, c.sigma_line_eof), eof.tag);
 }
 
-test "ft_isalpha" {
-    try std.testing.expect(c.ft_isalpha('A') != 0 and c.ft_isalpha('1') == 0);
-}
+test "ASCII table classifies and converts every byte" {
+    for (0..256) |value| {
+        const byte: u8 = @intCast(value);
+        const is_lower = byte >= 'a' and byte <= 'z';
+        const is_upper = byte >= 'A' and byte <= 'Z';
+        const is_digit = byte >= '0' and byte <= '9';
+        const is_space = byte == ' ' or (byte >= '\t' and byte <= '\r');
+        const is_cntrl = byte <= 0x1f or byte == 0x7f;
+        const is_print = byte >= 0x20 and byte <= 0x7e;
+        const is_xdigit = is_digit or
+            (byte >= 'A' and byte <= 'F') or
+            (byte >= 'a' and byte <= 'f');
 
-test "ft_isdigit" {
-    try std.testing.expect(c.ft_isdigit('7') != 0 and c.ft_isdigit('x') == 0);
-}
-
-test "ft_isalnum" {
-    try std.testing.expect(c.ft_isalnum('7') != 0 and c.ft_isalnum('-') == 0);
-}
-
-test "ft_isascii" {
-    try std.testing.expect(c.ft_isascii(127) != 0 and c.ft_isascii(128) == 0);
-}
-
-test "ft_isprint" {
-    try std.testing.expect(c.ft_isprint(' ') != 0 and c.ft_isprint('\n') == 0);
-}
-
-test "ft_tolower" {
-    try std.testing.expectEqual(@as(c_int, 'a'), c.ft_tolower('A'));
-}
-
-test "ft_toupper" {
-    try std.testing.expectEqual(@as(c_int, 'A'), c.ft_toupper('a'));
+        try std.testing.expectEqual(is_lower or is_upper, c.ascii_is_alpha(byte));
+        try std.testing.expectEqual(is_digit, c.ascii_is_digit(byte));
+        try std.testing.expectEqual(is_cntrl, c.ascii_is_cntrl(byte));
+        try std.testing.expectEqual(is_lower or is_upper or is_digit, c.ascii_is_alnum(byte));
+        try std.testing.expectEqual(is_lower, c.ascii_is_lower(byte));
+        try std.testing.expectEqual(is_print, c.ascii_is_print(byte));
+        try std.testing.expectEqual(is_upper, c.ascii_is_upper(byte));
+        try std.testing.expectEqual(is_space, c.ascii_is_space(byte));
+        try std.testing.expectEqual(is_xdigit, c.ascii_is_xdigit(byte));
+        try std.testing.expectEqual(if (is_upper) byte + 32 else byte, c.ascii_to_lower(byte));
+        try std.testing.expectEqual(if (is_lower) byte - 32 else byte, c.ascii_to_upper(byte));
+    }
 }
 
 test "ft_atoi" {

@@ -41,3 +41,23 @@
 #define SIGMA_REPEAT_8(F, C, N)                                                \
   SIGMA_REPEAT_4(F, C, (N) + 0)                                                \
   SIGMA_REPEAT_4(F, C, (N) + 4)
+
+#define SIGMA_REPEAT_16(F, C, N)                                               \
+  SIGMA_REPEAT_8(F, C, (N) + 0)                                                \
+  SIGMA_REPEAT_8(F, C, (N) + 8)
+
+#define SIGMA_REPEAT_32(F, C, N)                                               \
+  SIGMA_REPEAT_16(F, C, (N) + 0)                                               \
+  SIGMA_REPEAT_16(F, C, (N) + 16)
+
+#define SIGMA_REPEAT_64(F, C, N)                                               \
+  SIGMA_REPEAT_32(F, C, (N) + 0)                                               \
+  SIGMA_REPEAT_32(F, C, (N) + 32)
+
+#define SIGMA_REPEAT_128(F, C, N)                                              \
+  SIGMA_REPEAT_64(F, C, (N) + 0)                                               \
+  SIGMA_REPEAT_64(F, C, (N) + 64)
+
+#define SIGMA_REPEAT_256(F, C, N)                                              \
+  SIGMA_REPEAT_128(F, C, (N) + 0)                                              \
+  SIGMA_REPEAT_128(F, C, (N) + 128)

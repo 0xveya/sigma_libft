@@ -91,8 +91,6 @@ const source_files = [_][]const u8{
     "bytes/basic.c",
     "bytes/compare.c",
     "bytes/find.c",
-    "char/ft_is_things.c",
-    "char/ft_to_upper_to_lower.c",
     "collections/hash_map.c",
     "conversion/ft_itoa.c",
     "conversion/parse_i32.c",
