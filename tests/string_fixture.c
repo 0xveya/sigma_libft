@@ -173,11 +173,17 @@ static bool string_test_character_traits(void) {
   char upper = 'A';
   signed char digit = '7';
   unsigned char space = ' ';
+  sigma_rune lambda = sigma_rune_from_u32(0x03bb);
+  sigma_rune greek_upper = sigma_rune_from_u32(0x039b);
+  sigma_rune arabic_digit = sigma_rune_from_u32(0x0665);
 
   return sigma_isalpha(upper) && sigma_isupper(upper) && sigma_isdigit(digit) &&
          sigma_isalnum(digit) && sigma_isspace(space) && sigma_isprint(space) &&
          sigma_isxdigit(upper) && sigma_tolower(upper) == 'a' &&
-         sigma_toupper((unsigned char)'z') == 'Z';
+         sigma_toupper((unsigned char)'z') == 'Z' && sigma_isalpha(lambda) &&
+         sigma_islower(lambda) && sigma_isdigit(arabic_digit) &&
+         sigma_tolower(greek_upper).value == lambda.value &&
+         sigma_toupper(lambda).value == greek_upper.value;
 }
 
 bool sigma_test_string_ownership(void) {

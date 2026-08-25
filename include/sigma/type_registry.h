@@ -4,7 +4,8 @@
 #define SIGMA_CHARACTER_TYPES(X)                                               \
   X(char, ascii)                                                               \
   X(signed char, ascii)                                                        \
-  X(unsigned char, ascii)
+  X(unsigned char, ascii)                                                      \
+  X(sigma_rune, sigma_rune)
 
 /* Maps owning value types to their concrete clone and deinit operations. */
 #define SIGMA_OWNED_TYPES(X)                                                   \

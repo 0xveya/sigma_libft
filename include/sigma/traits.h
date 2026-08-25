@@ -5,6 +5,7 @@
 #include <sigma/ownership.h>
 #include <sigma/string_vec.h>
 #include <sigma/type_registry.h>
+#include <sigma/unicode.h>
 
 #define SIGMA_CHAR_ALNUM_ASSOC(type, prefix)                                   \
   type:                                                                        \
