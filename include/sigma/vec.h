@@ -9,10 +9,11 @@
 /*
  * Defines a vector for trivial or borrowed elements.
  *
- * Generated push and pop operations copy elements. clear and deinit never
- * deinitialize individual elements. take transfers the backing allocation and
- * resets its source to {0}. Views borrow the vector storage and remain valid
- * only until the vector grows, is taken, or is deinitialized.
+ * Generated init creates an empty vector. reserve grows capacity without
+ * changing length. push and pop copy elements. get returns NULL out of bounds.
+ * clear and deinit never deinitialize individual elements. take transfers the
+ * backing allocation and resets its source to {0}. Views borrow the vector
+ * storage and remain valid only until growth, take, or deinit.
  */
 #define SIGMA_VEC_DEFINE(T, Name)                                              \
   typedef struct {                                                             \
@@ -128,12 +129,13 @@
 /*
  * Defines a vector that owns every inserted element.
  *
- * deinit_fn must accept T * and leave the element safely deinitialized.
- * push_take consumes src only after any required growth succeeds. On failure,
- * both vec and src remain unchanged. pop_take transfers the final element into
- * an uninitialized or empty out value and clears its old slot. clear and deinit
- * call deinit_fn for every remaining element. take transfers the whole vector
- * and resets its source to {0}.
+ * Generated init creates an empty vector. reserve and ensure_push prepare
+ * capacity without consuming an element. deinit_fn must accept T * and leave
+ * the element safely deinitialized. push_take consumes src only after growth
+ * succeeds, leaving vec and src unchanged on failure. pop_take transfers the
+ * final element into an uninitialized or empty out value and clears its slot.
+ * clear and deinit destroy every remaining element. take transfers the whole
+ * vector and resets its source to {0}.
  */
 #define SIGMA_VEC_DEFINE_OWNED(T, Name, deinit_fn)                             \
   typedef struct {                                                             \
