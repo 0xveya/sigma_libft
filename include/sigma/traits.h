@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sigma/ascii.h>
+#include <sigma/format.h>
 #include <sigma/meta.h>
 #include <sigma/ownership.h>
 #include <sigma/string_vec.h>
@@ -79,6 +80,13 @@
 #define SIGMA_CLONE_ASSOC(tag, type, clone, deinit)                            \
   type * : clone, const type * : clone,
 #define SIGMA_DEINIT_ASSOC(tag, type, clone, deinit) type * : deinit,
+#define SIGMA_FORMAT_ASSOC(type, constructor)                                  \
+  type:                                                                        \
+  constructor,
+
+/* Converts a concrete value into a borrowed type-erased formatting argument. */
+#define sigma_fmt_arg(value)                                                   \
+  _Generic((value), SIGMA_FORMAT_TYPES(SIGMA_FORMAT_ASSOC) default: 0)(value)
 
 /* Clones src into an empty out value without changing either on failure. */
 #define sigma_clone(out, src)                                                  \

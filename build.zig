@@ -67,6 +67,10 @@ pub fn build(b: *std.Build) void {
         .file = b.path("tests/string_fixture.c"),
         .flags = &c_flags,
     });
+    tests.root_module.addCSourceFile(.{
+        .file = b.path("tests/format_fixture.c"),
+        .flags = &c_flags,
+    });
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 }
 
