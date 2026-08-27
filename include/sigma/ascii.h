@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sigma/diagnostic.h>
 #include <sigma/qol.h>
 
 #define SIGMA_ASCII_FLAGS(X)                                                   \
@@ -16,8 +17,11 @@
 
 enum sigma_ascii_flag : u8 { SIGMA_ASCII_FLAGS(SIGMA_ASCII_ENUM) };
 
-_Static_assert(sizeof(enum sigma_ascii_flag) == sizeof(u8),
-               "ASCII flags must fit in one byte");
+SIGMA_STATIC_ASSERT(sizeof(enum sigma_ascii_flag) == sizeof(u8),
+                    "SIGMA_E_ASCII_FLAG_SIZE",
+                    "ASCII flag storage no longer fits in one byte",
+                    enum sigma_ascii_flag,
+                    "reduce the flag width or change its declared base type");
 
 #undef SIGMA_ASCII_ENUM
 #undef SIGMA_ASCII_FLAGS

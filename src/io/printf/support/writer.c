@@ -1,76 +1,164 @@
-#include "../printf_internal.h"
+#include <sigma/libft.h>
+
+[[gnu::always_inline]] static inline bool
+sigma_writer_is_valid(sigma_writer writer) {
+  return writer.vtable != NULL && writer.vtable->write != NULL;
+}
+
+static bool sigma_fd_writer_write(void *ctx, bytes_t bytes) {
+  sigma_fd_writer *writer = ctx;
+  usize offset = 0;
+
+  while (offset < bytes.len) {
+    ssize_t written =
+        write(writer->fd, bytes.items + offset, (size_t)(bytes.len - offset));
+    if (written <= 0)
+      return false;
+    offset += (usize)written;
+  }
+  return true;
+}
+
+static bool sigma_string_writer_write(void *ctx, bytes_t bytes) {
+  sigma_string_writer *writer = ctx;
+
+  return string_append(writer->string, (str_t){
+                                           .items = (const char *)bytes.items,
+                                           .len = bytes.len,
+                                       });
+}
+
+static bool sigma_fixed_writer_write(void *ctx, bytes_t bytes) {
+  sigma_fixed_writer *writer = ctx;
+
+  if (bytes.len > writer->cap - writer->len)
+    return false;
+  ft_memcpy(writer->items + writer->len, bytes.items, bytes.len);
+  writer->len += bytes.len;
+  return true;
+}
+
+static const sigma_writer_vtable sigma_fd_writer_vtable = {
+    .write = sigma_fd_writer_write,
+};
+
+static const sigma_writer_vtable sigma_string_writer_vtable = {
+    .write = sigma_string_writer_write,
+};
+
+static const sigma_writer_vtable sigma_fixed_writer_vtable = {
+    .write = sigma_fixed_writer_write,
+};
 
 /* sigma:begin
-name: libft.io.printf.support.writer.ft_writer_flush
-provides: libft.ft_writer_flush
+name: libft.io.printf.support.writer.sigma_writer_write
+provides: libft.sigma_writer_write
 deps:
 externals:
 kind: function
 */
-int ft_writer_flush(t_writer *w) {
-  ssize_t written;
-  size_t off;
-
-  off = 0;
-  while (off < w->len) {
-    written = write(w->fd, w->buf + off, w->len - off);
-    if (written <= 0) {
-      w->error = 1;
-      return (0);
-    }
-    off += (size_t)written;
-  }
-  w->len = 0;
-  return (1);
+bool sigma_writer_write(sigma_writer writer, bytes_t bytes) {
+  return sigma_writer_is_valid(writer) &&
+         writer.vtable->write(writer.ctx, bytes);
 }
 /* sigma:end */
 
 /* sigma:begin
-name: libft.io.printf.support.writer.ft_writer_write
-provides: libft.ft_writer_write
-deps:
+name: libft.io.printf.support.writer.sigma_writer_str
+provides: libft.sigma_writer_str
+deps: libft.sigma_writer_write
 externals:
 kind: function
 */
-int ft_writer_write(t_writer *w, const char *s, size_t len) {
-  size_t space;
-  size_t n;
-
-  while (len > 0 && !w->error) {
-    space = sizeof(w->buf) - w->len;
-    if (space == 0) {
-      if (!ft_writer_flush(w))
-        return (0);
-      space = sizeof(w->buf);
-    }
-    n = len;
-    if (n > space)
-      n = space;
-    ft_memcpy(w->buf + w->len, s, n);
-    w->len += n;
-    w->total += (int)n;
-    s += n;
-    len -= n;
-  }
-  return (!w->error);
+bool sigma_writer_str(sigma_writer writer, str_t string) {
+  return sigma_writer_write(writer, str_bytes(string));
 }
 /* sigma:end */
 
-int ft_writer_char(t_writer *w, char c) { return (ft_writer_write(w, &c, 1)); }
-
 /* sigma:begin
-name: libft.io.printf.support.writer.ft_writer_repeat
-provides: libft.ft_writer_repeat
+name: libft.io.printf.support.writer.sigma_fd_writer_init
+provides: libft.sigma_fd_writer_init
 deps:
 externals:
 kind: function
 */
-int ft_writer_repeat(t_writer *w, char c, size_t n) {
-  while (n > 0) {
-    if (!ft_writer_char(w, c))
-      return (0);
-    n--;
-  }
-  return (1);
+sigma_fd_writer sigma_fd_writer_init(int fd) {
+  return (sigma_fd_writer){.fd = fd};
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_fd_writer_as_writer
+provides: libft.sigma_fd_writer_as_writer
+deps:
+externals:
+kind: function
+*/
+sigma_writer sigma_fd_writer_as_writer(sigma_fd_writer *writer) {
+  return (sigma_writer){.ctx = writer, .vtable = &sigma_fd_writer_vtable};
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_string_writer_init
+provides: libft.sigma_string_writer_init
+deps:
+externals:
+kind: function
+*/
+sigma_string_writer sigma_string_writer_init(string_t *string) {
+  return (sigma_string_writer){.string = string};
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_string_writer_as_writer
+provides: libft.sigma_string_writer_as_writer
+deps:
+externals:
+kind: function
+*/
+sigma_writer sigma_string_writer_as_writer(sigma_string_writer *writer) {
+  return (sigma_writer){.ctx = writer, .vtable = &sigma_string_writer_vtable};
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_fixed_writer_init
+provides: libft.sigma_fixed_writer_init
+deps:
+externals:
+kind: function
+*/
+sigma_fixed_writer sigma_fixed_writer_init(bytes_mut_t buffer) {
+  return (sigma_fixed_writer){
+      .items = buffer.items,
+      .len = 0,
+      .cap = buffer.len,
+  };
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_fixed_writer_as_writer
+provides: libft.sigma_fixed_writer_as_writer
+deps:
+externals:
+kind: function
+*/
+sigma_writer sigma_fixed_writer_as_writer(sigma_fixed_writer *writer) {
+  return (sigma_writer){.ctx = writer, .vtable = &sigma_fixed_writer_vtable};
+}
+/* sigma:end */
+
+/* sigma:begin
+name: libft.io.printf.support.writer.sigma_fixed_writer_written
+provides: libft.sigma_fixed_writer_written
+deps:
+externals:
+kind: function
+*/
+bytes_t sigma_fixed_writer_written(const sigma_fixed_writer *writer) {
+  return (bytes_t){.items = writer->items, .len = writer->len};
 }
 /* sigma:end */

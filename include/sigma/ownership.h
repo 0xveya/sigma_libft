@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sigma/diagnostic.h>
+
 /*
  * Compile-time type compatibility check.
  *
@@ -33,8 +35,10 @@
  */
 #define SIGMA_MOVE(dst, src)                                                   \
   do {                                                                         \
-    _Static_assert(SIGMA_SAME_TYPE((dst), (src)),                              \
-                   "SIGMA_MOVE: type mismatch");                               \
+    SIGMA_STATIC_ASSERT(                                                       \
+        SIGMA_SAME_TYPE((dst), (src)), "SIGMA_E_MOVE_TYPE",                    \
+        "cannot move between different types", dst = src,                      \
+        "make dst and src the same type or convert src explicitly");           \
     (dst) = (src);                                                             \
     (src) = (typeof(src)){0};                                                  \
   } while (0)
@@ -46,8 +50,10 @@
  */
 #define SIGMA_TAKE(dst, src)                                                   \
   do {                                                                         \
-    _Static_assert(SIGMA_SAME_TYPE((dst), (src)),                              \
-                   "SIGMA_TAKE: type mismatch");                               \
+    SIGMA_STATIC_ASSERT(                                                       \
+        SIGMA_SAME_TYPE((dst), (src)), "SIGMA_E_TAKE_TYPE",                    \
+        "cannot take between different types", dst = src,                      \
+        "make dst and src the same type or convert src explicitly");           \
     (dst) = (src);                                                             \
     (src) = (typeof(src)){0};                                                  \
   } while (0)
@@ -61,8 +67,10 @@
  */
 #define SIGMA_MOVE_PTR(dst, src)                                               \
   do {                                                                         \
-    _Static_assert(SIGMA_SAME_TYPE(*(dst), *(src)),                            \
-                   "SIGMA_MOVE_PTR: type mismatch");                           \
+    SIGMA_STATIC_ASSERT(                                                       \
+        SIGMA_SAME_TYPE(*(dst), *(src)), "SIGMA_E_MOVE_PTR_TYPE",              \
+        "cannot move through pointers to different types", *dst = *src,        \
+        "pass pointers to the same type or convert the value explicitly");     \
     *(dst) = *(src);                                                           \
     *(src) = (typeof(*(src))){0};                                              \
   } while (0)
@@ -75,7 +83,10 @@
  */
 #define SIGMA_SWAP(a, b)                                                       \
   do {                                                                         \
-    _Static_assert(SIGMA_SAME_TYPE((a), (b)), "SIGMA_SWAP: type mismatch");    \
+    SIGMA_STATIC_ASSERT(                                                       \
+        SIGMA_SAME_TYPE((a), (b)), "SIGMA_E_SWAP_TYPE",                        \
+        "cannot swap values of different types", a <->b,                       \
+        "make both values the same type before swapping them");                \
     typeof(a) sigma_swap_tmp__ = (a);                                          \
     (a) = (b);                                                                 \
     (b) = sigma_swap_tmp__;                                                    \

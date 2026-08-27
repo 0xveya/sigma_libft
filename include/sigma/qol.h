@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <unistd.h>
 
 #define var auto
 #define SIGMA_NPOS ((usize) - 1)
@@ -21,3 +22,14 @@ typedef float f32;
 typedef double f64;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
+
+_Noreturn static inline void panic(const char *msg) {
+  usize len = 0;
+
+  while (msg[len] != '\0')
+    len++;
+  (void)write(STDERR_FILENO, "PANIC: ", 7);
+  (void)write(STDERR_FILENO, msg, len);
+  (void)write(STDERR_FILENO, "\n", 1);
+  __builtin_trap();
+}

@@ -1,3 +1,4 @@
+#include <sigma/diagnostic.h>
 #include <sigma/unicode.h>
 
 #include <stddef.h>
@@ -23,8 +24,11 @@ static constexpr u8 sigma_unicode_data[] = {
 };
 // clang-format on
 
-_Static_assert(sizeof(sigma_unicode_data) % SIGMA_UNICODE_RECORD_SIZE == 0,
-               "invalid generated Unicode database");
+SIGMA_STATIC_ASSERT(
+    sizeof(sigma_unicode_data) % SIGMA_UNICODE_RECORD_SIZE == 0,
+    "SIGMA_E_UNICODE_DATABASE_SIZE",
+    "generated Unicode database has a partial record", sigma_unicode_data,
+    "regenerate unicode.bin with records of SIGMA_UNICODE_RECORD_SIZE bytes");
 
 typedef struct {
   u32 first;

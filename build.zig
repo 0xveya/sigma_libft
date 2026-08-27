@@ -71,7 +71,14 @@ pub fn build(b: *std.Build) void {
         .file = b.path("tests/format_fixture.c"),
         .flags = &c_flags,
     });
+    tests.root_module.addCSourceFile(.{
+        .file = b.path("tests/compile_contracts.c"),
+        .flags = &c_flags,
+    });
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
+
+    const diagnostics = b.addSystemCommand(&.{ "sh", "tools/show_diagnostics.sh" });
+    b.step("diagnostics", "Show and verify compile-time diagnostics").dependOn(&diagnostics.step);
 }
 
 fn configureC(b: *std.Build, module: *std.Build.Module, sigma_malloc: *std.Build.Dependency, simd: Simd) void {
@@ -99,18 +106,12 @@ const source_files = [_][]const u8{
     "collections/hash_map.c",
     "conversion/ft_itoa.c",
     "conversion/parse_i32.c",
-    "io/printf/conversion/integer_digits.c",
-    "io/printf/conversion/print_char.c",
-    "io/printf/conversion/print_hex.c",
-    "io/printf/conversion/print_int.c",
-    "io/printf/conversion/print_percent.c",
-    "io/printf/conversion/print_pointer.c",
-    "io/printf/conversion/print_string.c",
-    "io/printf/conversion/print_uint.c",
-    "io/printf/core/printf.c",
-    "io/printf/core/printf_dispatch.c",
+    "io/printf/format/format.c",
+    "io/printf/format/bytes.c",
+    "io/printf/format/integer.c",
     "io/printf/format/parse.c",
-    "io/printf/format/parse_utils.c",
+    "io/printf/format/scalar.c",
+    "io/printf/format/str.c",
     "io/printf/support/writer.c",
     "list/ft_lstadd_back.c",
     "list/ft_lstadd_front.c",
