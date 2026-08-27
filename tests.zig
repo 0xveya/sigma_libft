@@ -4,6 +4,13 @@ const c = @import("c");
 extern fn sigma_test_vec_codegen() bool;
 extern fn sigma_test_string_ownership() bool;
 extern fn sigma_test_format_dispatch() bool;
+extern fn sigma_test_format_runtime() bool;
+extern fn sigma_test_format_parser() bool;
+extern fn sigma_test_format_macros() bool;
+extern fn sigma_test_format_custom() bool;
+extern fn sigma_test_print_macro() bool;
+extern fn sigma_test_printf_wrappers() bool;
+extern fn sigma_test_meta() bool;
 
 var allocation_count: usize = 0;
 var free_count: usize = 0;
@@ -52,6 +59,34 @@ test "owned strings and string vectors preserve ownership contracts" {
 
 test "format arguments normalize values and borrow views" {
     try std.testing.expect(sigma_test_format_dispatch());
+}
+
+test "runtime formatting writes default integers and borrowed strings" {
+    try std.testing.expect(sigma_test_format_runtime());
+}
+
+test "Sigma format fields parse sequential presentation options" {
+    try std.testing.expect(sigma_test_format_parser());
+}
+
+test "preprocessor argument counting and mapping cover zero through 64" {
+    try std.testing.expect(sigma_test_meta());
+}
+
+test "format convenience macros map values and accept no arguments" {
+    try std.testing.expect(sigma_test_format_macros());
+}
+
+test "custom formatter vtables borrow and dispatch values" {
+    try std.testing.expect(sigma_test_format_custom());
+}
+
+test "sigma_print formats literals to stdout" {
+    try std.testing.expect(sigma_test_print_macro());
+}
+
+test "printf wrappers target buffers, fds, and owning strings" {
+    try std.testing.expect(sigma_test_printf_wrappers());
 }
 
 test "parse i32 distinguishes valid, invalid, and overflow input" {
@@ -305,35 +340,6 @@ test "ft_lstmap" {
     try std.testing.expect(mapped != null);
     defer c.ft_lstclear(&mapped, noopDelete);
     try std.testing.expectEqual(@as(c_int, 2), c.ft_lstsize(mapped));
-}
-
-test "ft_fprintf" {
-    var fds: [2]c_int = undefined;
-    try std.testing.expectEqual(@as(c_int, 0), c.pipe(&fds));
-    const written = c.ft_fprintf(fds[1], "value=%d %s", @as(c_int, 42), "ok");
-    _ = c.close(fds[1]);
-    var buffer: [64]u8 = undefined;
-    const count = c.read(fds[0], &buffer, buffer.len);
-    _ = c.close(fds[0]);
-    try std.testing.expectEqual(@as(c_int, 11), written);
-    try std.testing.expectEqualStrings("value=42 ok", buffer[0..@intCast(count)]);
-}
-
-test "ft_printf" {
-    var fds: [2]c_int = undefined;
-    try std.testing.expectEqual(@as(c_int, 0), c.pipe(&fds));
-    const saved = c.dup(c.STDOUT_FILENO);
-    try std.testing.expect(saved >= 0);
-    try std.testing.expectEqual(c.STDOUT_FILENO, c.dup2(fds[1], c.STDOUT_FILENO));
-    _ = c.close(fds[1]);
-    const written = c.ft_printf("value=%d %s", @as(c_int, 42), "ok");
-    try std.testing.expectEqual(c.STDOUT_FILENO, c.dup2(saved, c.STDOUT_FILENO));
-    _ = c.close(saved);
-    var buffer: [64]u8 = undefined;
-    const count = c.read(fds[0], &buffer, buffer.len);
-    _ = c.close(fds[0]);
-    try std.testing.expectEqual(@as(c_int, 11), written);
-    try std.testing.expectEqualStrings("value=42 ok", buffer[0..@intCast(count)]);
 }
 
 test "str converts from and to C strings" {
