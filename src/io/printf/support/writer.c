@@ -1,4 +1,5 @@
 #include <sigma/libft.h>
+#include <sigma/sys.h>
 
 [[gnu::always_inline]] static inline bool
 sigma_writer_is_valid(sigma_writer writer) {
@@ -10,11 +11,11 @@ static bool sigma_fd_writer_write(void *ctx, bytes_t bytes) {
   usize offset = 0;
 
   while (offset < bytes.len) {
-    ssize_t written =
-        write(writer->fd, bytes.items + offset, (size_t)(bytes.len - offset));
-    if (written <= 0)
+    sigma_write_result_t result =
+        s_write(writer->fd, bytes.items + offset, bytes.len - offset);
+    if (!result.ok || result.value == 0)
       return false;
-    offset += (usize)written;
+    offset += result.value;
   }
   return true;
 }

@@ -1,8 +1,16 @@
 set_project("sigma_libft")
-set_version("0.1.0")
+set_version("0.2.0")
 set_languages("c23")
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})
+includes("xmake/sigma_sys.lua")
+
+option("sigma_sys_only")
+    set_default(false)
+    set_showmenu(true)
+option_end()
+
+if not has_config("sigma_sys_only") then
 
 package("sigma_malloc")
     set_homepage("https://github.com/0xveya/sigma-malloc")
@@ -53,8 +61,9 @@ target("sigma_libft")
     add_cflags("-Wshadow", "-Wconversion", "-Wdouble-promotion", "-Wformat=2", "-Wundef", {force = true})
     add_includedirs("include", {public = true})
     add_packages("sigma_malloc", {public = true})
+    add_deps("sigma_sys", {public = true})
     add_headerfiles("include/(sigma/*.h)")
-    add_files("src/**.c")
+    add_files("src/**.c", {excludes = "src/sys/**.c"})
     local simd = get_config("simd") or "native"
     if simd ~= "native" then
         add_defines("SIGMA_SIMD_FORCE_" .. simd:upper())
@@ -102,6 +111,14 @@ target("sigma-libft-tests")
         add_tests(name, {runargs = {name}})
     end
 
+target("sigma-sys-tests")
+    set_kind("binary")
+    set_default(false)
+    set_warnings(table.unpack(warnings))
+    add_deps("sigma_sys")
+    add_files("tests/sys.c")
+    add_tests("tagged write errors and mmap lifecycle")
+
 target("sigma-libft-diagnostics")
     set_kind("object")
     set_default(false)
@@ -117,3 +134,4 @@ task("diagnostics")
     end)
     set_menu({usage = "xmake diagnostics", description = "Render intentional compile-time diagnostics"})
 task_end()
+end

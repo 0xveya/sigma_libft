@@ -1,4 +1,5 @@
 #include "format_internal.h"
+#include <unistd.h>
 
 /* sigma:begin
 name: libft.io.printf.format.format.sigma_fmt_write_repeat

@@ -3,9 +3,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <unistd.h>
-
-#define var auto
+#include <sigma/sys.h>
+#define let auto
 #define SIGMA_NPOS ((usize) - 1)
 
 typedef size_t usize;
@@ -23,13 +22,13 @@ typedef double f64;
 typedef uintptr_t uptr;
 typedef intptr_t iptr;
 
-_Noreturn static inline void panic(const char *msg) {
+[[noreturn]] static inline void panic(const char *msg) {
+  static const char prefix[] = "PANIC: ";
   usize len = 0;
-
   while (msg[len] != '\0')
     len++;
-  (void)write(STDERR_FILENO, "PANIC: ", 7);
-  (void)write(STDERR_FILENO, msg, len);
-  (void)write(STDERR_FILENO, "\n", 1);
-  __builtin_trap();
+  (void)s_write(2, prefix, sizeof(prefix) - 1);
+  (void)s_write(2, msg, len);
+  (void)s_write(2, "\n", 1);
+  s_exit(127);
 }
