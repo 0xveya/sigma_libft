@@ -1,8 +1,10 @@
 #pragma once
 
+#include <assert.h>
+
 #include <sigma/meta.h>
 
-/* Builds one consistent Rust-style compile-time diagnostic. */
+/* Builds one structured compile-time diagnostic for compilers and tooling. */
 #define SIGMA_DIAGNOSTIC(code, message, expression, help)                      \
   "\n\nerror[" code "]: " message "\n --> " __FILE__                           \
   ":" SIGMA_STRINGIFY(__LINE__) "\n  |\n  | `" #expression                     \
@@ -10,7 +12,7 @@
 
 /* Rejects an invalid compile-time contract with source and recovery context. */
 #define SIGMA_STATIC_ASSERT(condition, code, message, expression, help)        \
-  _Static_assert((condition), SIGMA_DIAGNOSTIC(code, message, expression, help))
+  static_assert((condition), SIGMA_DIAGNOSTIC(code, message, expression, help))
 
 /* Adds a declaration-context static assertion to an ordinary expression. */
 #define SIGMA_REQUIRE_EXPR(condition, code, message, expression, help, result) \

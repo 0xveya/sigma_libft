@@ -77,7 +77,22 @@ pub fn build(b: *std.Build) void {
     });
     b.step("test", "Run sigma_libft tests").dependOn(&b.addRunArtifact(tests).step);
 
-    const diagnostics = b.addSystemCommand(&.{ "sh", "tools/show_diagnostics.sh" });
+    const diagnostics = b.addSystemCommand(&.{
+        "go",
+        "run",
+        "./tools/sigma-diagnostics/main.go",
+        "--expect-failure",
+        "--",
+        "zig",
+        "cc",
+        "-std=c23",
+        "-Iinclude",
+        "-I../sigma_malloc/include",
+        "-c",
+        "tests/compile_fail/diagnostics.c",
+        "-o",
+        "/dev/null",
+    });
     b.step("diagnostics", "Show and verify compile-time diagnostics").dependOn(&diagnostics.step);
 }
 

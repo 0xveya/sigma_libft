@@ -19,6 +19,13 @@ run = "zig build test"
 description = "show and verify compile-time diagnostics"
 run = "zig build diagnostics"
 
+[tasks."build:diagnostics"]
+description = "build the optional diagnostic renderer"
+run = [
+  "mkdir -p zig-out/bin",
+  "go build -C tools/sigma-diagnostics -o ../../zig-out/bin/sigma-diagnostics .",
+]
+
 [tasks.stats]
 description = "recalculate README macro-to-C code statistics"
 run = "sh tools/update_code_stats.sh"

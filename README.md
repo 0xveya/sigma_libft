@@ -26,8 +26,8 @@ generic traits, formatting dispatch, and compile-time diagnostics.
   integer rendering, prefixes, signs, precision, fill, width, and alignment.
 - [`src/internal/cpu.h`](src/internal/cpu.h) and the modern memory sources route
   scalar, SSE2, and AVX2 implementations.
-- [`tools/show_diagnostics.sh`](tools/show_diagnostics.sh) renders and verifies
-  the intentionally failing compiler fixtures.
+- [`tools/sigma-diagnostics`](tools/sigma-diagnostics) is the optional,
+  compiler-independent renderer for structured Sigma diagnostics.
 
 ## Current features
 
@@ -42,7 +42,7 @@ generic traits, formatting dispatch, and compile-time diagnostics.
 - buffered line reading with explicit EOF, I/O, and allocation result tags
 - typed formatting, custom formatting vtables, fd/string/fixed-buffer writers,
   and stdout/fd/fixed/allocated printf wrappers
-- stable compile-time error codes with pretty diagnostic fixtures
+- stable compile-time error codes with an optional diagnostic renderer
 - Zig-driven C builds and tests across Debug, ReleaseFast, and selectable SIMD
   routes
 
@@ -91,10 +91,15 @@ The equivalent diagnostic command is:
 zig build diagnostics
 ```
 
-Set `SIGMA_DIAGNOSTICS_COLOR=never` for plain output. The diagnostic showcase
-uses color by default even when the surrounding environment exports
-`NO_COLOR`, because its purpose is to demonstrate the styled rendering. Set
-`SIGMA_DIAGNOSTICS_RAW=1` to include the underlying compiler output afterward.
+The renderer is a standalone Go compiler wrapper. Build it with
+`mise run build:diagnostics`, then use it with any build system:
+
+```sh
+zig-out/bin/sigma-diagnostics -- cc -std=c23 -Iinclude \
+  -I../sigma_malloc/include -c your_file.c
+```
+
+Without the wrapper, the compiler still emits the complete assertion message.
 
 ## Formatting
 
@@ -137,10 +142,11 @@ implemented yet. Literal brace escaping is also not implemented yet.
 
 ## Compile-time diagnostics
 
-Public generic and ownership macros use Rust-style diagnostics with stable
-error codes, source locations, the offending expression, and recovery help.
+Public generic and ownership macros use C23 `static_assert` with stable error
+codes, source locations, the offending expression, and recovery help. Compilers
+render these assertions directly; the optional Go wrapper can restyle them.
 Compile-time contracts are collected in `tests/compile_contracts.c`; intentional
-failures used by the pretty diagnostic runner live in
+failures used by the diagnostic runner live in
 `tests/compile_fail/diagnostics.c`.
 
 ## Unicode database
