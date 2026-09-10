@@ -1,29 +1,31 @@
 [tools]
-zig = "0.16.0"
+"conda:clang" = "latest"
+"github:xmake-io/xmake" = "latest"
+go = "latest"
 clang-format = "latest"
 "conda:bear" = "latest"
 
 [tasks.build]
 description = "build sigma_libft"
-run = "zig build -Doptimize=ReleaseFast"
+run = "xmake f -m release -y && xmake -y"
 
 [tasks.dev]
 description = "build sigma_libft with debug checks"
-run = "zig build -Doptimize=Debug"
+run = "xmake f -m debug -y && xmake -y"
 
 [tasks.test]
-description = "run the Zig tests"
-run = "zig build test"
+description = "run the C test suite"
+run = "xmake test -v"
 
 [tasks.diagnostics]
 description = "show and verify compile-time diagnostics"
-run = "zig build diagnostics"
+run = "xmake diagnostics"
 
 [tasks."build:diagnostics"]
 description = "build the optional diagnostic renderer"
 run = [
-  "mkdir -p zig-out/bin",
-  "go build -C tools/sigma-diagnostics -o ../../zig-out/bin/sigma-diagnostics .",
+  "mkdir -p build/bin",
+  "go build -C tools/sigma-diagnostics -o ../../build/bin/sigma-diagnostics .",
 ]
 
 [tasks.stats]
@@ -33,20 +35,20 @@ run = "sh tools/update_code_stats.sh"
 [tasks."test:simd"]
 description = "run tests through scalar, SSE2, AVX2, and automatic SIMD routing"
 run = [
-  "zig build test -Dsimd=scalar",
-  "zig build test -Dsimd=sse2",
-  "zig build test -Dsimd=avx2",
-  "zig build test -Dsimd=auto",
+  "xmake f -m debug --simd=scalar -y && xmake test -v",
+  "xmake f -m debug --simd=sse2 -y && xmake test -v",
+  "xmake f -m debug --simd=avx2 -y && xmake test -v",
+  "xmake f -m debug --simd=native -y && xmake test -v",
 ]
 
 [tasks.compiledb]
 description = "generate compile_commands.json"
-run = "make compiledb"
+run = "xmake project -k compile_commands ."
 
 [tasks.format]
 description = "format C sources and headers"
-run = "find src include -type f \\( -name '*.c' -o -name '*.h' \\) -print0 | xargs -0 clang-format -i"
+run = "find src include tests -type f \\( -name '*.c' -o -name '*.h' \\) -print0 | xargs -0 clang-format -i"
 
 [tasks.clean]
 description = "remove generated build files"
-run = "rm -rf zig-out .zig-cache compile_commands.json"
+run = "xmake clean -a && rm -rf build compile_commands.json"

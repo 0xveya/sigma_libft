@@ -41,6 +41,7 @@ SIGMA_STATIC_ASSERT(sizeof(contract_map) / sizeof(*contract_map) == 64,
                     "SIGMA_PP_MAP must emit one element for every argument");
 
 bool sigma_test_meta(void) {
-  return contract_four[0] == 1 && contract_four[3] == 4 &&
-         contract_map[0] == 1 && contract_map[63] == 64;
+  return contract_empty[0] == 0 && contract_four[0] == 1 &&
+         contract_four[3] == 4 && contract_map[0] == 1 &&
+         contract_map[63] == 64;
 }

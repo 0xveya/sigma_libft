@@ -1,7 +1,7 @@
 # sigma_libft
 
-A C23 utility library for the Sigma ecosystem. It is built with Zig 0.16.0
-and integrates with `sigma_malloc`.
+A C23 utility library for the Sigma ecosystem. It is built with Clang and
+Xmake and integrates with `sigma_malloc`.
 
 The code deliberately uses C23 metaprogramming for typed ownership helpers,
 generic traits, formatting dispatch, and compile-time diagnostics.
@@ -43,10 +43,10 @@ generic traits, formatting dispatch, and compile-time diagnostics.
 - typed formatting, custom formatting vtables, fd/string/fixed-buffer writers,
   and stdout/fd/fixed/allocated printf wrappers
 - stable compile-time error codes with an optional diagnostic renderer
-- Zig-driven C builds and tests across Debug, ReleaseFast, and selectable SIMD
+- Xmake-driven C builds and tests across debug, release, and selectable SIMD
   routes
 
-Every C source currently under `src/` is referenced by `build.zig`; the previous
+Every C source currently under `src/` is referenced by `xmake.lua`; the previous
 printf implementation and empty compatibility headers were removed rather than
 left as dead alternatives.
 
@@ -76,8 +76,8 @@ The repository uses `mise` to pin tools and expose the usual commands:
 
 ```sh
 mise run dev          # Debug build
-mise run build        # ReleaseFast build
-mise run test         # complete Zig-driven C test suite
+mise run build        # release build
+mise run test         # complete native C test suite
 mise run test:simd    # scalar, SSE2, AVX2, and automatic SIMD routing
 mise run diagnostics  # show and verify intentional compile-time errors
 mise run stats        # refresh README macro-to-C code statistics
@@ -88,18 +88,20 @@ mise run clean        # remove generated build files
 The equivalent diagnostic command is:
 
 ```sh
-zig build diagnostics
+xmake diagnostics
 ```
 
 The renderer is a standalone Go compiler wrapper. Build it with
 `mise run build:diagnostics`, then use it with any build system:
 
 ```sh
-zig-out/bin/sigma-diagnostics -- cc -std=c23 -Iinclude \
+build/bin/sigma-diagnostics -- cc -std=c23 -Iinclude \
   -I../sigma_malloc/include -c your_file.c
 ```
 
 Without the wrapper, the compiler still emits the complete assertion message.
+Configure with `xmake f --sigma_diagnostics=y` to route Xmake compiler output
+through the renderer, or leave the option off for unmodified Clang diagnostics.
 
 ## Formatting
 
@@ -155,7 +157,7 @@ failures used by the diagnostic runner live in
 `UnicodeData.txt`, `DerivedCoreProperties.txt`, and `PropList.txt` files:
 
 ```sh
-zig cc -std=c23 -Wall -Wextra -Wpedantic -pedantic-errors \
+clang -std=c23 -Wall -Wextra -Wpedantic -pedantic-errors \
   tools/unicode_gen.c -o /tmp/sigma-unicode-gen
 /tmp/sigma-unicode-gen \
   /path/to/UnicodeData.txt \

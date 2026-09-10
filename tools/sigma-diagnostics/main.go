@@ -114,7 +114,10 @@ func parseArgs(args []string) (config, error) {
 		}
 	}
 	if separator < 0 {
-		return config{}, fmt.Errorf("%w: expected -- before the compiler command", errUsage)
+		if len(args) == 0 {
+			return config{}, fmt.Errorf("%w: missing compiler arguments", errUsage)
+		}
+		return config{color: "auto", command: append([]string{"clang"}, args...)}, nil
 	}
 	if err := flags.Parse(args[:separator]); err != nil {
 		return config{}, fmt.Errorf("%w: %v", errUsage, err)
@@ -149,24 +152,73 @@ func parseDiagnostics(output string) []diagnostic {
 }
 
 func renderDiagnostic(output *os.File, item diagnostic, color bool) error {
-	bold, red, blue, cyan, reset := "", "", "", "", ""
+	bold, red, pink, blue, cyan, reset := "", "", "", "", "", ""
 	if color {
-		bold, red, blue, cyan, reset = "\x1b[1m", "\x1b[1;31m", "\x1b[1;34m", "\x1b[1;36m", "\x1b[0m"
+		bold, red, pink, blue, cyan, reset = "\x1b[1m", "\x1b[1;31m", "\x1b[1;35m", "\x1b[1;34m", "\x1b[1;36m", "\x1b[0m"
 	}
 	lineNumber, _ := strconv.Atoi(item.line)
-	padding := strings.Repeat(" ", len(item.line))
+	source, column, marker := diagnosticSource(item, lineNumber)
+	namespace := "sigma::compile::" + strings.ToLower(strings.TrimPrefix(item.code, "SIGMA_E_"))
+	note := diagnosticNote(item)
+	caretPadding := strings.Repeat(" ", column-1)
+	carets := strings.Repeat("^", marker)
+	summary := item.message
+	if summary != "" {
+		summary = strings.ToUpper(summary[:1]) + summary[1:]
+	}
 	_, err := fmt.Fprintf(
 		output,
-		"%serror[%s]:%s %s%s%s\n %s╭─[%s%s:%d%s]\n %s%s│%s `%s`\n %s%s╰─%s %shelp:%s %s\n\n",
-		red, item.code, reset, bold, item.message, reset,
-		blue, reset, item.file, lineNumber, blue,
-		padding, blue, reset, item.expression,
-		padding, blue, reset, cyan, reset, item.help,
+		"%sError:%s %s%s%s [%s]\n\n %s×%s %s%s%s\n   %s╭─[%s%s%s:%d:%d%s%s]%s\n%s %s│%s %s\n   %s·%s %s%s%s%s%s\n\n   %snote:%s %s\n\n   %shelp:%s %s\n\n",
+		bold, reset, pink, namespace, reset, item.code,
+		red, reset, bold, summary, reset,
+		blue, reset, bold, item.file, lineNumber, column, reset, blue, reset,
+		item.line, blue, reset, source,
+		blue, reset, caretPadding, red, bold, carets, reset,
+		blue, reset, note,
+		cyan, reset, item.help,
 	)
 	if err != nil {
 		return fmt.Errorf("render diagnostic: %w", err)
 	}
 	return nil
+}
+
+func diagnosticSource(item diagnostic, lineNumber int) (string, int, int) {
+	data, err := os.ReadFile(item.file)
+	if err != nil {
+		return "`" + item.expression + "`", 1, len(item.expression)
+	}
+	lines := strings.Split(string(data), "\n")
+	if lineNumber < 1 || lineNumber > len(lines) {
+		return "`" + item.expression + "`", 1, len(item.expression)
+	}
+	source := lines[lineNumber-1]
+	column := strings.Index(source, item.expression)
+	marker := len(item.expression)
+	if column < 0 {
+		trimmed := strings.TrimSpace(source)
+		column = strings.Index(source, trimmed)
+		marker = len(trimmed)
+	}
+	if marker < 1 {
+		marker = 1
+	}
+	return source, column + 1, marker
+}
+
+func diagnosticNote(item diagnostic) string {
+	switch item.code {
+	case "SIGMA_E_FORMAT_TYPE":
+		return "Sigma only accepts builtin or explicitly registered formatting types."
+	case "SIGMA_E_MOVE_TYPE", "SIGMA_E_MOVE_PTR_TYPE", "SIGMA_E_TAKE_TYPE", "SIGMA_E_SWAP_TYPE":
+		return "Ownership operations require identical source and destination types and never perform conversion."
+	case "SIGMA_E_CHARACTER_TYPE":
+		return "Character traits dispatch only byte characters and sigma_rune values."
+	case "SIGMA_E_CLONE_TYPE", "SIGMA_E_CLONE_OUTPUT_TYPE", "SIGMA_E_DEINIT_TYPE", "SIGMA_E_REPLACE_TYPE":
+		return "The type is not registered for this ownership operation."
+	default:
+		return "A Sigma compile-time contract rejected this expression."
+	}
 }
 
 func stderrIsTerminal() bool {

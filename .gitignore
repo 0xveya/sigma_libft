@@ -1,4 +1,6 @@
 /.zig-cache/
 /zig-out/
+/build/
+/.xmake/
 /compile_commands.json
 *.out

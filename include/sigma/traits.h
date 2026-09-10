@@ -2,9 +2,9 @@
 
 #include <sigma/ascii.h>
 #include <sigma/diagnostic.h>
-#include <sigma/printf.h>
 #include <sigma/meta.h>
 #include <sigma/ownership.h>
+#include <sigma/printf.h>
 #include <sigma/string_vec.h>
 #include <sigma/type_registry.h>
 #include <sigma/unicode.h>
