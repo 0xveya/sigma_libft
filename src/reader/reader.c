@@ -1,9 +1,8 @@
 #include <sigma/libft.h>
 #include <sigma/reader.h>
+#include <sigma/sys.h>
 
 #include "reader_internal.h"
-
-#include <unistd.h>
 
 typedef struct reader_arena_block {
   struct reader_arena_block *next;
@@ -121,15 +120,15 @@ static sigma_line_tag refill(sigma_line_reader *reader) {
   reader->read_length = 0;
   if (reader->reached_eof)
     return sigma_line_eof;
-  isize amount =
-      read(reader->fd, reader->read_buffer, sizeof(reader->read_buffer));
-  if (amount < 0)
+  sigma_read_result_t result =
+      s_read(reader->fd, reader->read_buffer, sizeof(reader->read_buffer));
+  if (!result.ok)
     return sigma_line_io_error;
-  if (amount == 0) {
+  if (result.value == 0) {
     reader->reached_eof = true;
     return sigma_line_eof;
   }
-  reader->read_length = (usize)amount;
+  reader->read_length = result.value;
   return sigma_line_ok;
 }
 

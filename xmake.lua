@@ -1,5 +1,5 @@
 set_project("sigma_libft")
-set_version("0.2.2")
+set_version("0.3.0")
 set_languages("c23")
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})

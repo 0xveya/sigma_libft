@@ -1,5 +1,11 @@
 #include <sigma/sys.h>
 
+static bool test_read(void) {
+  char byte = 0;
+  sigma_read_result_t result = s_read(-1, &byte, 1);
+  return !result.ok && result.error.code == 9;
+}
+
 static bool test_write_error(void) {
   sigma_write_result_t result = s_write(-1, "x", 1);
   return !result.ok && result.error.code == 9;
@@ -20,5 +26,5 @@ static bool test_map_and_unmap(void) {
 }
 
 int main(void) {
-  return test_write_error() && test_map_and_unmap() ? 0 : 1;
+  return test_read() && test_write_error() && test_map_and_unmap() ? 0 : 1;
 }
