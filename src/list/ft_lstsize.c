@@ -1,12 +1,6 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.list.ft_lstsize.ft_lstsize
-provides: libft.ft_lstsize
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft lstsize operation. */
 int ft_lstsize(t_list *lst) {
   int size;
 
@@ -17,4 +11,3 @@ int ft_lstsize(t_list *lst) {
   }
   return (size);
 }
-/* sigma:end */

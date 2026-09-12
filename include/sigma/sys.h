@@ -15,6 +15,14 @@ typedef struct sigma_sys_error {
   i32 code;
 } sigma_sys_error_t;
 
+typedef struct sigma_sys_result {
+  bool ok;
+  union {
+    iptr value;
+    sigma_sys_error_t error;
+  };
+} sigma_sys_result_t;
+
 typedef struct sigma_read_result {
   bool ok;
   union {
@@ -71,6 +79,7 @@ typedef enum sigma_mmap_flags {
 
 #define SIGMA_SYS_ARG_DECL(arg) SIGMA_SYS_ARG_DECL_I arg
 #define SIGMA_SYS_ARG_DECL_I(type, name) type name
+#define SIGMA_SYS_DECLS_0(...) void
 #define SIGMA_SYS_DECLS_1(a0) SIGMA_SYS_ARG_DECL(a0)
 #define SIGMA_SYS_DECLS_2(a0, a1) SIGMA_SYS_DECLS_1(a0), SIGMA_SYS_ARG_DECL(a1)
 #define SIGMA_SYS_DECLS_3(a0, a1, a2)                                          \

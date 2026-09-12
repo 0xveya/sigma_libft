@@ -1,12 +1,6 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.conversion.parse_i32.sigma_parse_i32
-provides: int.parse.i32
-deps:
-externals:
-kind: function
-*/
+/** Performs the sigma parse i32 operation. */
 sigma_parse_i32_result sigma_parse_i32(const char *text) {
   sigma_parse_i32_result result = {.tag = sigma_parse_i32_invalid};
   const char *digits = text;
@@ -34,18 +28,10 @@ sigma_parse_i32_result sigma_parse_i32(const char *text) {
   result.value = *text == '-' ? (i32) - (i64)magnitude : (i32)magnitude;
   return result;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.conversion.parse_i32.ft_atoi
-provides: int.atoi
-deps: int.parse.i32
-externals:
-kind: function
-*/
+/** Performs the ft atoi operation. */
 int ft_atoi(const char *text) {
   sigma_parse_i32_result result = sigma_parse_i32(text);
 
   return result.tag == sigma_parse_i32_ok ? result.value : 0;
 }
-/* sigma:end */

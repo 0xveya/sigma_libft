@@ -44,13 +44,7 @@ static usize scan_avx2(const u8 *bytes, usize size) {
   return index + scan_scalar(bytes + index, size - index);
 }
 
-/* sigma:begin
-name: libft.reader.scan.sigma_reader_find_newline
-provides: io.reader.scan
-deps:
-externals:
-kind: function
-*/
+/** Performs the sigma reader find newline operation. */
 usize sigma_reader_find_newline(const u8 *bytes, usize size) {
   static scan_fn implementation;
   if (implementation == nullptr) {
@@ -68,4 +62,3 @@ usize sigma_reader_find_newline(const u8 *bytes, usize size) {
   }
   return implementation(bytes, size);
 }
-/* sigma:end */

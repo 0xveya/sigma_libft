@@ -13,13 +13,7 @@ static int ft_numlen(long n) {
   return (len);
 }
 
-/* sigma:begin
-name: libft.conversion.ft_itoa.ft_itoa
-provides: libft.ft_itoa
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft itoa operation. */
 char *ft_itoa(int n) {
   char *str;
   long nb;
@@ -43,4 +37,3 @@ char *ft_itoa(int n) {
   }
   return (str);
 }
-/* sigma:end */

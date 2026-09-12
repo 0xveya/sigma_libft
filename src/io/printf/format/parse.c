@@ -67,13 +67,7 @@ static bool sigma_fmt_parse_number(str_t input, usize *pos, usize *out) {
   return true;
 }
 
-/* sigma:begin
-name: libft.io.printf.format.parse.sigma_fmt_parse_field
-provides: libft.sigma_fmt_parse_field
-deps:
-externals:
-kind: function
-*/
+/** Performs the sigma fmt parse field operation. */
 sigma_fmt_parse_result sigma_fmt_parse_field(str_t input,
                                              sigma_fmt_field *field) {
   if (input.len == 0)
@@ -171,4 +165,3 @@ sigma_fmt_parse_result sigma_fmt_parse_field(str_t input,
   *field = (sigma_fmt_field){.spec = spec, .consumed = pos + 1};
   return SIGMA_FMT_PARSE_OK;
 }
-/* sigma:end */

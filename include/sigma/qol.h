@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdbool.h>
 #include <sigma/sys.h>
 #include <sigma/types.h>
+#include <stdbool.h>
 #define let auto
 #define SIGMA_NPOS ((usize) - 1)
 

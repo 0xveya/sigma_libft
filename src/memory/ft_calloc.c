@@ -1,13 +1,7 @@
 #include <sigma/libft.h>
 #include <stdint.h>
 
-/* sigma:begin
-name: libft.memory.ft_calloc.ft_calloc
-provides: libft.ft_calloc
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft calloc operation. */
 void *ft_calloc(size_t n, size_t size) {
   void *ptr;
   size_t total;
@@ -22,4 +16,3 @@ void *ft_calloc(size_t n, size_t size) {
     return (NULL);
   return (ft_bzero(ptr, total), ptr);
 }
-/* sigma:end */

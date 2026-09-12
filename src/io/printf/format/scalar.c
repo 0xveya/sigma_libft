@@ -1,12 +1,6 @@
 #include "format_internal.h"
 
-/* sigma:begin
-name: libft.io.printf.format.scalar.sigma_fmt_write_bool
-provides: libft.sigma_fmt_write_bool
-deps: libft.sigma_fmt_write_str
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write bool operation. */
 bool sigma_fmt_write_bool(sigma_writer writer, bool value,
                           const sigma_fmt_spec *spec) {
   sigma_fmt_spec string_spec = *spec;
@@ -18,15 +12,8 @@ bool sigma_fmt_write_bool(sigma_writer writer, bool value,
   return sigma_fmt_write_str(writer, value ? STR_LIT("true") : STR_LIT("false"),
                              &string_spec);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.scalar.sigma_fmt_write_char
-provides: libft.sigma_fmt_write_char
-deps: libft.sigma_fmt_write_str
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write char operation. */
 bool sigma_fmt_write_char(sigma_writer writer, char value,
                           const sigma_fmt_spec *spec) {
   sigma_fmt_spec string_spec = *spec;
@@ -38,15 +25,8 @@ bool sigma_fmt_write_char(sigma_writer writer, char value,
   return sigma_fmt_write_str(
       writer, (str_t){.items = &value, .len = sizeof(value)}, &string_spec);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.scalar.sigma_fmt_write_rune
-provides: libft.sigma_fmt_write_rune
-deps: libft.sigma_fmt_write_str
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write rune operation. */
 bool sigma_fmt_write_rune(sigma_writer writer, sigma_rune value,
                           const sigma_fmt_spec *spec) {
   char encoded[4];
@@ -81,15 +61,8 @@ bool sigma_fmt_write_rune(sigma_writer writer, sigma_rune value,
   return sigma_fmt_write_str(writer, (str_t){.items = encoded, .len = len},
                              &string_spec);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.scalar.sigma_fmt_write_ptr
-provides: libft.sigma_fmt_write_ptr
-deps: libft.sigma_fmt_write_u64
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write ptr operation. */
 bool sigma_fmt_write_ptr(sigma_writer writer, const void *value,
                          const sigma_fmt_spec *spec) {
   sigma_fmt_spec integer_spec = *spec;
@@ -101,4 +74,3 @@ bool sigma_fmt_write_ptr(sigma_writer writer, const void *value,
   integer_spec.alternate = true;
   return sigma_fmt_write_u64(writer, (u64)(uptr)value, &integer_spec);
 }
-/* sigma:end */

@@ -1,12 +1,6 @@
 #include <sigma/str.h>
 
-/* sigma:begin
-name: libft.str.split.str_split_scalar
-provides: str.split_scalar
-deps:
-externals:
-kind: function
-*/
+/** Performs the str split scalar operation. */
 str_split_scalar_t str_split_scalar(str_t s, u8 delimiter) {
   return (str_split_scalar_t){
       .remaining = s,
@@ -14,15 +8,8 @@ str_split_scalar_t str_split_scalar(str_t s, u8 delimiter) {
       .finished = false,
   };
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.str.split.str_split_scalar_next
-provides: str.split_scalar.next
-deps: str.find_byte, str.sub
-externals:
-kind: function
-*/
+/** Performs the str split scalar next operation. */
 bool str_split_scalar_next(str_split_scalar_t *it, str_t *out) {
   if (it->finished)
     return false;
@@ -41,4 +28,3 @@ bool str_split_scalar_next(str_split_scalar_t *it, str_t *out) {
 
   return true;
 }
-/* sigma:end */

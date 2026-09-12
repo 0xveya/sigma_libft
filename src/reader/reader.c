@@ -77,38 +77,26 @@ static void reader_arena_deinit(allocator_arena_t *arena) {
   arena->blocks = nullptr;
 }
 
-/* sigma:begin
-name: libft.reader.reader.sigma_line_reader_init
-provides: io.reader.init
-deps: mem.alloc
-externals:
-kind: function
-*/
+/** Performs the sigma line reader init operation. */
 void sigma_line_reader_init(sigma_line_reader *reader, i32 fd,
                             allocator_t allocator) {
-  *reader = (sigma_line_reader){
-      .fd = fd,
-      .arena = {.parent = allocator, .block_size = SIGMA_READER_BUFFER_SIZE},
-  };
+  ft_bzero(reader, sizeof(*reader));
+  reader->fd = fd;
+  reader->arena.parent = allocator;
+  reader->arena.block_size = SIGMA_READER_BUFFER_SIZE;
   reader->allocator = (allocator_t){
       .ctx = &reader->arena,
       .vtable = &reader_arena_vtable,
   };
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.reader.reader.sigma_line_reader_deinit
-provides: io.reader.deinit
-deps: mem.free
-externals:
-kind: function
-*/
+/** Performs the sigma line reader deinit operation. */
 void sigma_line_reader_deinit(sigma_line_reader *reader) {
   reader_arena_deinit(&reader->arena);
-  *reader = (sigma_line_reader){.fd = -1, .reached_eof = true};
+  ft_bzero(reader, sizeof(*reader));
+  reader->fd = -1;
+  reader->reached_eof = true;
 }
-/* sigma:end */
 
 static sigma_line_result line_result(sigma_line_tag tag, char *items,
                                      usize len) {
@@ -160,13 +148,7 @@ static bool reserve(sigma_line_reader *reader, usize required) {
   return true;
 }
 
-/* sigma:begin
-name: libft.reader.reader.sigma_line_reader_next
-provides: io.reader.next
-deps: mem.alloc, mem.copy, io.read, io.reader.scan
-externals:
-kind: function
-*/
+/** Performs the sigma line reader next operation. */
 sigma_line_result sigma_line_reader_next(sigma_line_reader *reader) {
   usize length = 0;
 
@@ -198,4 +180,3 @@ sigma_line_result sigma_line_reader_next(sigma_line_reader *reader) {
   reader->line_buffer[length] = '\0';
   return line_result(sigma_line_ok, reader->line_buffer, length);
 }
-/* sigma:end */

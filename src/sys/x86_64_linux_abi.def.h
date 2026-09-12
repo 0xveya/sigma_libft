@@ -1,13 +1,15 @@
 #pragma once
 
 #define SIGMA_X86_64_SYSCALL_ARITIES(X)                                        \
-  X(1)                                                                         \
-  X(2)                                                                         \
-  X(3)                                                                         \
-  X(4)                                                                         \
-  X(5)                                                                         \
-  X(6)
+  X(0, ZERO)                                                                   \
+  X(1, NORMAL)                                                                 \
+  X(2, NORMAL)                                                                 \
+  X(3, NORMAL)                                                                 \
+  X(4, NORMAL)                                                                 \
+  X(5, NORMAL)                                                                 \
+  X(6, NORMAL)
 
+#define SIGMA_X86_64_PARAMS_0
 #define SIGMA_X86_64_PARAMS_1 syscall_arg_t arg0
 #define SIGMA_X86_64_PARAMS_2 SIGMA_X86_64_PARAMS_1, syscall_arg_t arg1
 #define SIGMA_X86_64_PARAMS_3 SIGMA_X86_64_PARAMS_2, syscall_arg_t arg2
@@ -15,6 +17,7 @@
 #define SIGMA_X86_64_PARAMS_5 SIGMA_X86_64_PARAMS_4, syscall_arg_t arg4
 #define SIGMA_X86_64_PARAMS_6 SIGMA_X86_64_PARAMS_5, syscall_arg_t arg5
 
+#define SIGMA_X86_64_INPUTS_0 "D"(number)
 #define SIGMA_X86_64_INPUTS_1 "D"(arg0)
 #define SIGMA_X86_64_INPUTS_2 SIGMA_X86_64_INPUTS_1, "S"(arg1)
 #define SIGMA_X86_64_INPUTS_3 SIGMA_X86_64_INPUTS_2, "d"(arg2)
@@ -22,6 +25,7 @@
 #define SIGMA_X86_64_INPUTS_5 SIGMA_X86_64_INPUTS_4, "r"(r8)
 #define SIGMA_X86_64_INPUTS_6 SIGMA_X86_64_INPUTS_5, "r"(r9)
 
+#define SIGMA_X86_64_REGISTERS_0
 #define SIGMA_X86_64_REGISTERS_1
 #define SIGMA_X86_64_REGISTERS_2
 #define SIGMA_X86_64_REGISTERS_3

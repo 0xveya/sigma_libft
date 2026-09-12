@@ -64,12 +64,7 @@ static bool sigma_fmt_write_bytes_body(sigma_writer writer, bytes_t value,
          sigma_writer_str(writer, STR_LIT("]"));
 }
 
-/* sigma:begin
-name: libft.io.printf.format.bytes.sigma_fmt_write_bytes
-provides: libft.sigma_fmt_write_bytes
-deps: libft.sigma_writer_write libft.sigma_writer_str
-libft.sigma_fmt_write_repeat externals: kind: function
-*/
+/** Performs the sigma fmt write bytes operation. */
 bool sigma_fmt_write_bytes(sigma_writer writer, bytes_t value,
                            const sigma_fmt_spec *spec) {
   if (spec->alternate || spec->zero_pad || spec->sign_plus || spec->sign_space)
@@ -90,4 +85,3 @@ bool sigma_fmt_write_bytes(sigma_writer writer, bytes_t value,
          sigma_fmt_write_bytes_body(writer, value, spec) &&
          sigma_fmt_write_repeat(writer, spec->fill, pad - left);
 }
-/* sigma:end */

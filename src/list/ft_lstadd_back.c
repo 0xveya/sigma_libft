@@ -1,12 +1,6 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.list.ft_lstadd_back.ft_lstadd_back
-provides: libft.ft_lstadd_back
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft lstadd back operation. */
 void ft_lstadd_back(t_list **lst, t_list *new) {
   t_list *tmp;
 
@@ -19,4 +13,3 @@ void ft_lstadd_back(t_list **lst, t_list *new) {
     tmp->next = new;
   }
 }
-/* sigma:end */

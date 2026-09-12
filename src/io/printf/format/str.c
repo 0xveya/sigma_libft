@@ -1,12 +1,6 @@
 #include "format_internal.h"
 
-/* sigma:begin
-name: libft.io.printf.format.str.sigma_fmt_write_str
-provides: libft.sigma_fmt_write_str
-deps: libft.sigma_writer_str libft.sigma_fmt_write_repeat
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write str operation. */
 bool sigma_fmt_write_str(sigma_writer writer, str_t value,
                          const sigma_fmt_spec *spec) {
   if (spec->presentation != SIGMA_FMT_PRESENT_DEFAULT)
@@ -30,4 +24,3 @@ bool sigma_fmt_write_str(sigma_writer writer, str_t value,
          sigma_writer_str(writer, (str_t){.items = value.items, .len = len}) &&
          sigma_fmt_write_repeat(writer, spec->fill, right);
 }
-/* sigma:end */

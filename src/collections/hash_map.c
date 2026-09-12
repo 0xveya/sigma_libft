@@ -1,20 +1,13 @@
 #include <sigma/hash_map.h>
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_hash
-provides: str.hash
-deps:
-externals:
-kind: function
-*/
+/** Performs the sigma str hash operation. */
 u64 sigma_str_hash(str_t string) {
   u64 hash = 5381;
   for (usize i = 0; i < string.len; i++)
     hash = ((hash << 5) + hash) + (u8)string.items[i];
   return hash;
 }
-/* sigma:end */
 
 static sigma_map_entry *find_entry(sigma_map_entry *entries, usize capacity,
                                    str_t key) {
@@ -64,13 +57,7 @@ static bool grow(sigma_str_map *map) {
   return true;
 }
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_map_init
-provides: str.map.init
-deps: mem.alloc
-externals:
-kind: function
-*/
+/** Performs the sigma str map init operation. */
 bool sigma_str_map_init(sigma_str_map *map, allocator_t allocator,
                         usize capacity) {
   if (map == nullptr)
@@ -84,28 +71,14 @@ bool sigma_str_map_init(sigma_str_map *map, allocator_t allocator,
   map->cap = capacity;
   return true;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_map_deinit
-provides: str.map.deinit
-deps: mem.free
-externals:
-kind: function
-*/
+/** Performs the sigma str map deinit operation. */
 void sigma_str_map_deinit(sigma_str_map *map) {
   free_entries(map);
   *map = (sigma_str_map){};
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_map_get
-provides: str.map.get
-deps: mem.compare, str.hash
-externals:
-kind: function
-*/
+/** Performs the sigma str map get operation. */
 str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
   if (map == nullptr || map->cap == 0)
     return nullptr;
@@ -120,27 +93,13 @@ str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
   }
   return nullptr;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_map_has
-provides: str.map.has
-deps: str.map.get
-externals:
-kind: function
-*/
+/** Performs the sigma str map has operation. */
 bool sigma_str_map_has(sigma_str_map *map, str_t key) {
   return sigma_str_map_get(map, key) != nullptr;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.collections.hash_map.sigma_str_map_put
-provides: str.map.put
-deps: mem.alloc, mem.compare, str.hash
-externals:
-kind: function
-*/
+/** Performs the sigma str map put operation. */
 bool sigma_str_map_put(sigma_str_map *map, str_t key, str_t value) {
   if (map == nullptr)
     return false;
@@ -159,4 +118,3 @@ bool sigma_str_map_put(sigma_str_map *map, str_t key, str_t value) {
   map->len++;
   return true;
 }
-/* sigma:end */

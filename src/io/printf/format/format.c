@@ -1,13 +1,7 @@
 #include "format_internal.h"
 #include <unistd.h>
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_fmt_write_repeat
-provides: libft.sigma_fmt_write_repeat
-deps: libft.sigma_writer_str
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write repeat operation. */
 bool sigma_fmt_write_repeat(sigma_writer writer, u32 fill, usize count) {
   char buffer[64];
 
@@ -24,14 +18,8 @@ bool sigma_fmt_write_repeat(sigma_writer writer, u32 fill, usize count) {
   }
   return true;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_fmt_write_arg
-provides: libft.sigma_fmt_write_arg
-deps: libft.sigma_fmt_write_i64 libft.sigma_fmt_write_u64
-libft.sigma_fmt_write_str externals: kind: function
-*/
+/** Performs the sigma fmt write arg operation. */
 bool sigma_fmt_write_arg(sigma_writer writer, sigma_fmt_arg_t arg,
                          const sigma_fmt_spec *spec) {
   switch (arg.kind) {
@@ -71,14 +59,8 @@ bool sigma_fmt_write_arg(sigma_writer writer, sigma_fmt_arg_t arg,
     return false;
   }
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_format_args
-provides: libft.sigma_format_args
-deps: libft.sigma_fmt_parse_field libft.sigma_fmt_write_arg
-libft.sigma_writer_str externals: kind: function
-*/
+/** Performs the sigma format args operation. */
 bool sigma_format_args(sigma_writer writer, str_t format,
                        const sigma_fmt_arg_t *args, usize arg_count) {
   usize pos = 0;
@@ -136,16 +118,8 @@ bool sigma_format_args(sigma_writer writer, str_t format,
 
   return arg == arg_count;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_fprint_args
-provides: libft.sigma_fprint_args
-deps: libft.sigma_fd_writer_init libft.sigma_fd_writer_as_writer
-libft.sigma_format_args
-externals:
-kind: function
-*/
+/** Performs the sigma fprint args operation. */
 bool sigma_fprint_args(int fd, str_t format, const sigma_fmt_arg_t *args,
                        usize arg_count) {
   sigma_fd_writer writer = sigma_fd_writer_init(fd);
@@ -153,16 +127,8 @@ bool sigma_fprint_args(int fd, str_t format, const sigma_fmt_arg_t *args,
   return sigma_format_args(sigma_fd_writer_as_writer(&writer), format, args,
                            arg_count);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_snprint_args
-provides: libft.sigma_snprint_args
-deps: libft.sigma_fixed_writer_init libft.sigma_fixed_writer_as_writer
-libft.sigma_fixed_writer_written libft.sigma_format_args
-externals:
-kind: function
-*/
+/** Performs the sigma snprint args operation. */
 bool sigma_snprint_args(char *buffer, usize capacity, str_t format,
                         const sigma_fmt_arg_t *args, usize arg_count) {
   if (buffer == NULL || capacity == 0)
@@ -180,16 +146,8 @@ bool sigma_snprint_args(char *buffer, usize capacity, str_t format,
   buffer[written.len] = '\0';
   return true;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_asprint_args
-provides: libft.sigma_asprint_args
-deps: libft.string_init libft.string_deinit libft.sigma_string_writer_init
-libft.sigma_string_writer_as_writer libft.sigma_format_args
-externals:
-kind: function
-*/
+/** Performs the sigma asprint args operation. */
 bool sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
                         const sigma_fmt_arg_t *args, usize arg_count) {
   if (out == NULL)
@@ -205,17 +163,9 @@ bool sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
   *out = result;
   return true;
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.format.sigma_print_args
-provides: libft.sigma_print_args
-deps: libft.sigma_fprint_args
-externals: STDOUT_FILENO
-kind: function
-*/
+/** Performs the sigma print args operation. */
 bool sigma_print_args(str_t format, const sigma_fmt_arg_t *args,
                       usize arg_count) {
   return sigma_fprint_args(STDOUT_FILENO, format, args, arg_count);
 }
-/* sigma:end */

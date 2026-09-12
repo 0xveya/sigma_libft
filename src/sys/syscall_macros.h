@@ -3,6 +3,8 @@
 #define SIGMA_SYS_ARG_VALUE(arg) SIGMA_SYS_ARG_VALUE_I arg
 #define SIGMA_SYS_ARG_VALUE_I(type, name) ((syscall_arg_t)(name))
 
+#define SIGMA_SYS_VALUES_0(...)
+
 #define SIGMA_SYS_VALUES_1(a0) SIGMA_SYS_ARG_VALUE(a0)
 
 #define SIGMA_SYS_VALUES_2(a0, a1)                                             \

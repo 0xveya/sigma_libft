@@ -1,11 +1,4 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.memory.ft_bzero.ft_bzero
-provides: mem.zero
-deps: mem.set
-externals:
-kind: function
-*/
+/** Performs the ft bzero operation. */
 void ft_bzero(void *s, size_t n) { (void)ft_memset(s, 0, n); }
-/* sigma:end */

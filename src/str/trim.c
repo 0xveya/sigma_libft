@@ -2,13 +2,7 @@
 #include <sigma/qol.h>
 #include <sigma/str.h>
 
-/* sigma:begin
-name: libft.str.trim.str_trim_start_ascii
-provides: str.trim_start_ascii
-deps: ascii.is_space, str.sub
-externals:
-kind: function
-*/
+/** Performs the str trim start ascii operation. */
 str_t str_trim_start_ascii(str_t s) {
   usize start = 0;
 
@@ -17,15 +11,8 @@ str_t str_trim_start_ascii(str_t s) {
 
   return str_sub(s, start, s.len - start);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.str.trim.str_trim_end_ascii
-provides: str.trim_end_ascii
-deps: ascii.is_space, str.sub
-externals:
-kind: function
-*/
+/** Performs the str trim end ascii operation. */
 str_t str_trim_end_ascii(str_t s) {
   usize end = s.len;
 
@@ -34,16 +21,8 @@ str_t str_trim_end_ascii(str_t s) {
 
   return str_sub(s, 0, end);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.str.trim.str_trim_ascii
-provides: str.trim_ascii
-deps: str.trim_start_ascii, str.trim_end_ascii
-externals:
-kind: function
-*/
+/** Performs the str trim ascii operation. */
 str_t str_trim_ascii(str_t s) {
   return str_trim_end_ascii(str_trim_start_ascii(s));
 }
-/* sigma:end */

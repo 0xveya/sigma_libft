@@ -103,13 +103,7 @@ static mem_find_fn select_mem_find(void) {
   }
 }
 
-/* sigma:begin
-name: libft.memory.find.mem_find
-provides: mem.find
-deps: cpu.simd_level
-externals:
-kind: function
-*/
+/** Performs the mem find operation. */
 usize mem_find(const void *ptr, usize len, u8 value) {
   static mem_find_fn implementation;
 
@@ -118,4 +112,3 @@ usize mem_find(const void *ptr, usize len, u8 value) {
 
   return implementation(ptr, len, value);
 }
-/* sigma:end */

@@ -1,12 +1,6 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.list.ft_lstclear.ft_lstclear
-provides: libft.ft_lstclear
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft lstclear operation. */
 void ft_lstclear(t_list **lst, void (*del)(void *)) {
   t_list *tmp;
 
@@ -19,4 +13,3 @@ void ft_lstclear(t_list **lst, void (*del)(void *)) {
     *lst = tmp;
   }
 }
-/* sigma:end */

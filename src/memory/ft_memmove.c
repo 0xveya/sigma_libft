@@ -1,12 +1,6 @@
 #include <sigma/libft.h>
 
-/* sigma:begin
-name: libft.memory.ft_memmove.ft_memmove
-provides: libft.ft_memmove
-deps:
-externals:
-kind: function
-*/
+/** Performs the ft memmove operation. */
 void *ft_memmove(void *dst, const void *src, size_t len) {
   unsigned char *dest_char;
   unsigned char *src_char;
@@ -23,4 +17,3 @@ void *ft_memmove(void *dst, const void *src, size_t len) {
       *dest_char++ = *src_char++;
   return (dst);
 }
-/* sigma:end */

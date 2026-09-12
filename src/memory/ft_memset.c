@@ -63,13 +63,7 @@ static memset_fn select_memset(void) {
   }
 }
 
-/* sigma:begin
-name: libft.memory.ft_memset.ft_memset
-provides: libft.ft_memset
-deps: cpu.simd_level
-externals:
-kind: function
-*/
+/** Performs the ft memset operation. */
 void *ft_memset(void *ptr, int byte, usize size) {
   static memset_fn implementation;
   if (implementation == nullptr)
@@ -77,4 +71,3 @@ void *ft_memset(void *ptr, int byte, usize size) {
   implementation(ptr, (u8)byte, size);
   return ptr;
 }
-/* sigma:end */

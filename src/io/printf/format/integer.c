@@ -132,13 +132,7 @@ static bool sigma_fmt_write_integer(sigma_writer writer,
          sigma_fmt_write_repeat(writer, spec->fill, right);
 }
 
-/* sigma:begin
-name: libft.io.printf.format.integer.sigma_fmt_write_u64
-provides: libft.sigma_fmt_write_u64
-deps: libft.sigma_writer_str libft.sigma_fmt_write_repeat
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write u64 operation. */
 bool sigma_fmt_write_u64(sigma_writer writer, u64 value,
                          const sigma_fmt_spec *spec) {
   char buffer[64];
@@ -148,15 +142,8 @@ bool sigma_fmt_write_u64(sigma_writer writer, u64 value,
 
   return sigma_fmt_write_integer(writer, integer, spec);
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.io.printf.format.integer.sigma_fmt_write_i64
-provides: libft.sigma_fmt_write_i64
-deps: libft.sigma_writer_str libft.sigma_fmt_write_repeat
-externals:
-kind: function
-*/
+/** Performs the sigma fmt write i64 operation. */
 bool sigma_fmt_write_i64(sigma_writer writer, i64 value,
                          const sigma_fmt_spec *spec) {
   char buffer[64];
@@ -174,4 +161,3 @@ bool sigma_fmt_write_i64(sigma_writer writer, i64 value,
       sigma_fmt_render_integer(buffer + sizeof(buffer), magnitude, sign, spec);
   return sigma_fmt_write_integer(writer, integer, spec);
 }
-/* sigma:end */

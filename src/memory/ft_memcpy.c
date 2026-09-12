@@ -75,13 +75,7 @@ static memcpy_fn select_memcpy(void) {
   }
 }
 
-/* sigma:begin
-name: libft.memory.ft_memcpy.ft_memcpy
-provides: libft.ft_memcpy
-deps: cpu.simd_level
-externals:
-kind: function
-*/
+/** Performs the ft memcpy operation. */
 void *ft_memcpy(void *restrict dst, const void *restrict src, usize size) {
   static memcpy_fn implementation;
   if (implementation == nullptr)
@@ -89,4 +83,3 @@ void *ft_memcpy(void *restrict dst, const void *restrict src, usize size) {
   implementation(dst, src, size);
   return dst;
 }
-/* sigma:end */

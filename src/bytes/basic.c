@@ -1,23 +1,10 @@
 #include <sigma/bytes.h>
 #include <sigma/qol.h>
 
-/* sigma:begin
-name: libft.bytes.basic.bytes_is_empty
-provides: bytes.is_empty
-deps:
-externals:
-kind: function
-*/
+/** Performs the bytes is empty operation. */
 bool bytes_is_empty(bytes_t bytes) { return bytes.len == 0; }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.bytes.basic.bytes_sub
-provides: bytes.sub
-deps:
-externals:
-kind: function
-*/
+/** Performs the bytes sub operation. */
 bytes_t bytes_sub(bytes_t bytes, usize start, usize len) {
   if (start > bytes.len)
     start = bytes.len;
@@ -32,15 +19,8 @@ bytes_t bytes_sub(bytes_t bytes, usize start, usize len) {
       .len = len,
   };
 }
-/* sigma:end */
 
-/* sigma:begin
-name: libft.bytes.basic.bytes_mut_sub
-provides: bytes.mut_sub
-deps:
-externals:
-kind: function
-*/
+/** Performs the bytes mut sub operation. */
 bytes_mut_t bytes_mut_sub(bytes_mut_t bytes, usize start, usize len) {
   if (start > bytes.len)
     start = bytes.len;
@@ -55,4 +35,3 @@ bytes_mut_t bytes_mut_sub(bytes_mut_t bytes, usize start, usize len) {
       .len = len,
   };
 }
-/* sigma:end */
