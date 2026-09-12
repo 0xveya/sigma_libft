@@ -9,6 +9,46 @@
 #include <sigma/type_registry.h>
 #include <sigma/unicode.h>
 
+#define SIGMA_DEFINE_ASCII_ADAPTERS(type, prefix)                              \
+  static inline bool SIGMA_CAT(prefix, _is_alnum)(type value) {                \
+    return ascii_is_alnum((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_alpha)(type value) {                \
+    return ascii_is_alpha((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_cntrl)(type value) {                \
+    return ascii_is_cntrl((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_digit)(type value) {                \
+    return ascii_is_digit((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_lower)(type value) {                \
+    return ascii_is_lower((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_print)(type value) {                \
+    return ascii_is_print((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_space)(type value) {                \
+    return ascii_is_space((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_upper)(type value) {                \
+    return ascii_is_upper((u8)value);                                          \
+  }                                                                            \
+  static inline bool SIGMA_CAT(prefix, _is_xdigit)(type value) {               \
+    return ascii_is_xdigit((u8)value);                                         \
+  }                                                                            \
+  static inline type SIGMA_CAT(prefix, _to_lower)(type value) {                \
+    return (type)ascii_to_lower((u8)value);                                    \
+  }                                                                            \
+  static inline type SIGMA_CAT(prefix, _to_upper)(type value) {                \
+    return (type)ascii_to_upper((u8)value);                                    \
+  }
+
+SIGMA_DEFINE_ASCII_ADAPTERS(char, sigma_char)
+SIGMA_DEFINE_ASCII_ADAPTERS(signed char, sigma_signed_char)
+
+#undef SIGMA_DEFINE_ASCII_ADAPTERS
+
 #define SIGMA_CHAR_ALNUM_ASSOC(type, prefix)                                   \
   type:                                                                        \
   SIGMA_CAT(prefix, _is_alnum),

@@ -13,8 +13,8 @@
 
 /* Maps character value types to the prefix of their concrete operations. */
 #define SIGMA_CHARACTER_TYPES(X)                                               \
-  X(char, ascii)                                                               \
-  X(signed char, ascii)                                                        \
+  X(char, sigma_char)                                                          \
+  X(signed char, sigma_signed_char)                                            \
   X(unsigned char, ascii)                                                      \
   X(sigma_rune, sigma_rune)
 

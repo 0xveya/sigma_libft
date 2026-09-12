@@ -169,8 +169,15 @@ static bool test_owned_vec_contract(allocator_t allocator,
       vec.allocator.vtable != NULL || moved.len != 1)
     return false;
 
+  test_owned_vec cloned = {0};
+  if (!test_owned_vec_clone(&cloned, &moved) || cloned.len != 1 ||
+      cloned.items[0].ptr == moved.items[0].ptr ||
+      *cloned.items[0].ptr != *moved.items[0].ptr)
+    return false;
+
+  test_owned_vec_deinit(&cloned);
   test_owned_vec_deinit(&moved);
-  return deinit_count == 2 && moved.items == NULL && moved.len == 0 &&
+  return deinit_count == 3 && moved.items == NULL && moved.len == 0 &&
          moved.cap == 0 && moved.allocator.vtable == NULL;
 }
 
