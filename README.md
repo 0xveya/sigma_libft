@@ -62,9 +62,9 @@ declarations rather than raw file length.
 
 | Kind | Lines | Share |
 | --- | ---: | ---: |
-| C23 macros | 689 | 23.7% |
-| Runtime C and declarations | 2223 | 76.3% |
-| Total classified code | 2912 | 100.0% |
+| C23 macros | 2285 | 49.9% |
+| Runtime C and declarations | 2291 | 50.1% |
+| Total classified code | 4576 | 100.0% |
 
 <!-- sigma-code-stats:end -->
 
