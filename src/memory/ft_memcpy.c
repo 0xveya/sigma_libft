@@ -4,6 +4,7 @@
 
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <stdatomic.h>
 
 typedef void (*memcpy_fn)(u8 *restrict, const u8 *restrict, usize);
 
@@ -77,9 +78,12 @@ static memcpy_fn select_memcpy(void) {
 
 /** Performs the ft memcpy operation. */
 void *ft_memcpy(void *restrict dst, const void *restrict src, usize size) {
-  static memcpy_fn implementation;
-  if (implementation == nullptr)
+  static _Atomic(memcpy_fn) cached;
+  memcpy_fn implementation = atomic_load_explicit(&cached, memory_order_relaxed);
+  if (implementation == nullptr) {
     implementation = select_memcpy();
+    atomic_store_explicit(&cached, implementation, memory_order_relaxed);
+  }
   implementation(dst, src, size);
   return dst;
 }

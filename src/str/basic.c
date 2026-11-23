@@ -9,6 +9,7 @@ str_t str_from_cstr(const char *s) {
   return (str_t){.items = s, .len = len};
 }
 
+#ifndef SIGMA_RUNTIME_ONLY
 /** Performs the str to cstr operation. */
 sigma_cstr_result str_to_cstr(str_t s, allocator_t allocator) {
   if (s.len == SIZE_MAX)
@@ -23,6 +24,7 @@ sigma_cstr_result str_to_cstr(str_t s, allocator_t allocator) {
   result[s.len] = '\0';
   return OK(sigma_cstr_result, result);
 }
+#endif
 
 /** Performs the str is empty operation. */
 bool str_is_empty(str_t s) { return s.len == 0; }

@@ -2,7 +2,9 @@
 
 #include <sigma/bytes.h>
 #include <sigma/str.h>
+#ifndef SIGMA_RUNTIME_ONLY
 #include <sigma/string.h>
+#endif
 
 #include <stdbool.h>
 
@@ -31,9 +33,11 @@ typedef struct {
   int fd;
 } sigma_fd_writer;
 
+#ifndef SIGMA_RUNTIME_ONLY
 typedef struct {
   string_t *string;
 } sigma_string_writer;
+#endif
 
 typedef struct {
   u8 *items;
@@ -51,9 +55,11 @@ sigma_fd_writer sigma_fd_writer_init(int fd);
 
 sigma_writer sigma_fd_writer_as_writer(sigma_fd_writer *writer);
 
+#ifndef SIGMA_RUNTIME_ONLY
 sigma_string_writer sigma_string_writer_init(string_t *string);
 
 sigma_writer sigma_string_writer_as_writer(sigma_string_writer *writer);
+#endif
 
 sigma_fixed_writer sigma_fixed_writer_init(bytes_mut_t buffer);
 

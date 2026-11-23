@@ -4,6 +4,7 @@
 
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <stdatomic.h>
 
 typedef usize (*mem_find_fn)(const u8 *, usize, u8);
 
@@ -105,10 +106,12 @@ static mem_find_fn select_mem_find(void) {
 
 /** Performs the mem find operation. */
 sigma_offset mem_find(const void *ptr, usize len, u8 value) {
-  static mem_find_fn implementation;
-
-  if (implementation == nullptr)
+  static _Atomic(mem_find_fn) cached;
+  mem_find_fn implementation = atomic_load_explicit(&cached, memory_order_relaxed);
+  if (implementation == nullptr) {
     implementation = select_mem_find();
+    atomic_store_explicit(&cached, implementation, memory_order_relaxed);
+  }
 
   usize offset = implementation(ptr, len, value);
   return offset == SIGMA_NPOS ? NONE(sigma_offset) : SOME(sigma_offset, offset);

@@ -4,6 +4,7 @@
 
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <stdatomic.h>
 
 typedef i32 (*mem_cmp_fn)(const u8 *, const u8 *, usize);
 
@@ -111,10 +112,12 @@ static mem_cmp_fn select_mem_cmp(void) {
 
 /** Performs the mem cmp operation. */
 i32 mem_cmp(const void *a, const void *b, usize len) {
-  static mem_cmp_fn implementation;
-
-  if (implementation == nullptr)
+  static _Atomic(mem_cmp_fn) cached;
+  mem_cmp_fn implementation = atomic_load_explicit(&cached, memory_order_relaxed);
+  if (implementation == nullptr) {
     implementation = select_mem_cmp();
+    atomic_store_explicit(&cached, implementation, memory_order_relaxed);
+  }
 
   return implementation(a, b, len);
 }

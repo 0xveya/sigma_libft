@@ -153,6 +153,7 @@ sigma_format_status sigma_snprint_args(char *buffer, usize capacity,
   return OK(sigma_format_status, sigma_unit);
 }
 
+#ifndef SIGMA_RUNTIME_ONLY
 /** Performs the sigma asprint args operation. */
 sigma_format_status sigma_asprint_args(string_t *out, allocator_t allocator,
                                        str_t format,
@@ -172,6 +173,7 @@ sigma_format_status sigma_asprint_args(string_t *out, allocator_t allocator,
   *out = result;
   return OK(sigma_format_status, sigma_unit);
 }
+#endif
 
 /** Performs the sigma print args operation. */
 sigma_format_status sigma_print_args(str_t format, const sigma_fmt_arg_t *args,

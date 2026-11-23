@@ -1,4 +1,5 @@
-#include <sigma/libft.h>
+#include <sigma/mem.h>
+#include <sigma/writer.h>
 #include <sigma/sys.h>
 
 [[gnu::always_inline]] static inline bool
@@ -22,6 +23,7 @@ static sigma_writer_status sigma_fd_writer_write(void *ctx, bytes_t bytes) {
   return OK(sigma_writer_status, sigma_unit);
 }
 
+#ifndef SIGMA_RUNTIME_ONLY
 static sigma_writer_status sigma_string_writer_write(void *ctx, bytes_t bytes) {
   sigma_string_writer *writer = ctx;
 
@@ -36,6 +38,7 @@ static sigma_writer_status sigma_string_writer_write(void *ctx, bytes_t bytes) {
   }
   return OK(sigma_writer_status, sigma_unit);
 }
+#endif
 
 static sigma_writer_status sigma_fixed_writer_write(void *ctx, bytes_t bytes) {
   sigma_fixed_writer *writer = ctx;
@@ -51,9 +54,11 @@ static const sigma_writer_vtable sigma_fd_writer_vtable = {
     .write = sigma_fd_writer_write,
 };
 
+#ifndef SIGMA_RUNTIME_ONLY
 static const sigma_writer_vtable sigma_string_writer_vtable = {
     .write = sigma_string_writer_write,
 };
+#endif
 
 static const sigma_writer_vtable sigma_fixed_writer_vtable = {
     .write = sigma_fixed_writer_write,
@@ -81,6 +86,7 @@ sigma_writer sigma_fd_writer_as_writer(sigma_fd_writer *writer) {
   return (sigma_writer){.ctx = writer, .vtable = &sigma_fd_writer_vtable};
 }
 
+#ifndef SIGMA_RUNTIME_ONLY
 /** Performs the sigma string writer init operation. */
 sigma_string_writer sigma_string_writer_init(string_t *string) {
   return (sigma_string_writer){.string = string};
@@ -90,6 +96,7 @@ sigma_string_writer sigma_string_writer_init(string_t *string) {
 sigma_writer sigma_string_writer_as_writer(sigma_string_writer *writer) {
   return (sigma_writer){.ctx = writer, .vtable = &sigma_string_writer_vtable};
 }
+#endif
 
 /** Performs the sigma fixed writer init operation. */
 sigma_fixed_writer sigma_fixed_writer_init(bytes_mut_t buffer) {

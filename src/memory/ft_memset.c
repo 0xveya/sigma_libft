@@ -4,6 +4,7 @@
 
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <stdatomic.h>
 
 typedef void (*memset_fn)(u8 *, u8, usize);
 
@@ -65,9 +66,12 @@ static memset_fn select_memset(void) {
 
 /** Performs the ft memset operation. */
 void *ft_memset(void *ptr, int byte, usize size) {
-  static memset_fn implementation;
-  if (implementation == nullptr)
+  static _Atomic(memset_fn) cached;
+  memset_fn implementation = atomic_load_explicit(&cached, memory_order_relaxed);
+  if (implementation == nullptr) {
     implementation = select_memset();
+    atomic_store_explicit(&cached, implementation, memory_order_relaxed);
+  }
   implementation(ptr, (u8)byte, size);
   return ptr;
 }

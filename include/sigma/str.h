@@ -1,6 +1,8 @@
 #pragma once
 
+#ifndef SIGMA_RUNTIME_ONLY
 #include <allocator_vtable.h>
+#endif
 #include <sigma/attributes.h>
 #include <sigma/bytes.h>
 #include <sigma/qol.h>
@@ -44,8 +46,10 @@ str_t str_from_cstr(const char *s);
 
 RESULT(sigma_cstr_result, char *, sigma_alloc_error);
 
+#ifndef SIGMA_RUNTIME_ONLY
 /* Allocates a NUL-terminated copy. */
 SIGMA_NODISCARD sigma_cstr_result str_to_cstr(str_t s, allocator_t allocator);
+#endif
 
 /* Properties */
 

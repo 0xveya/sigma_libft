@@ -3,14 +3,21 @@ set_version("0.4.1")
 set_languages("c23")
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})
-includes("xmake/sigma_sys.lua")
 
 option("sigma_sys_only")
     set_default(false)
     set_showmenu(true)
 option_end()
 
-if not has_config("sigma_sys_only") then
+option("sigma_runtime_only")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Build syscalls, memory primitives, and borrowed diagnostics")
+option_end()
+
+includes("xmake/sigma_sys.lua")
+
+if not has_config("sigma_sys_only") and not has_config("sigma_runtime_only") then
 
 package("sigma_malloc")
     set_homepage("https://github.com/0xveya/sigma-malloc")

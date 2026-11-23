@@ -329,6 +329,7 @@ SIGMA_NODISCARD sigma_format_status
 sigma_snprint_args(char *buffer, usize capacity, str_t format,
                    const sigma_fmt_arg_t *args, usize arg_count);
 
+#ifndef SIGMA_RUNTIME_ONLY
 /*
  * Allocates a formatted owning string without changing out on failure.
  *
@@ -337,6 +338,7 @@ sigma_snprint_args(char *buffer, usize capacity, str_t format,
 SIGMA_NODISCARD sigma_format_status
 sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
                    const sigma_fmt_arg_t *args, usize arg_count);
+#endif
 
 /* Formats borrowed arguments to stdout. */
 SIGMA_NODISCARD sigma_format_status
@@ -348,9 +350,11 @@ sigma_print_args(str_t format, const sigma_fmt_arg_t *args, usize arg_count);
 #define sigma_snprintf(buffer, capacity, format, ...)                          \
   sigma_snprint_args((buffer), (capacity), STR_LIT(format),                    \
                      SIGMA_FMT_ARGS(__VA_ARGS__), SIGMA_PP_NARGS(__VA_ARGS__))
+#ifndef SIGMA_RUNTIME_ONLY
 #define sigma_asprintf(out, allocator, format, ...)                            \
   sigma_asprint_args((out), (allocator), STR_LIT(format),                      \
                      SIGMA_FMT_ARGS(__VA_ARGS__), SIGMA_PP_NARGS(__VA_ARGS__))
+#endif
 #define sigma_printf(format, ...)                                              \
   sigma_print_args(STR_LIT(format), SIGMA_FMT_ARGS(__VA_ARGS__),               \
                    SIGMA_PP_NARGS(__VA_ARGS__))
