@@ -8,8 +8,18 @@
 
 typedef struct sigma_writer sigma_writer;
 
+typedef enum {
+  sigma_writer_invalid,
+  sigma_writer_io_error,
+  sigma_writer_no_progress,
+  sigma_writer_out_of_memory,
+  sigma_writer_capacity_exceeded,
+} sigma_writer_error;
+
+RESULT(sigma_writer_status, sigma_unit_t, sigma_writer_error);
+
 typedef struct {
-  bool (*write)(void *ctx, bytes_t bytes);
+  sigma_writer_status (*write)(void *ctx, bytes_t bytes);
 } sigma_writer_vtable;
 
 struct sigma_writer {
@@ -31,9 +41,11 @@ typedef struct {
   usize cap;
 } sigma_fixed_writer;
 
-bool sigma_writer_write(sigma_writer writer, bytes_t bytes);
+SIGMA_NODISCARD sigma_writer_status sigma_writer_write(sigma_writer writer,
+                                                       bytes_t bytes);
 
-bool sigma_writer_str(sigma_writer writer, str_t string);
+SIGMA_NODISCARD sigma_writer_status sigma_writer_str(sigma_writer writer,
+                                                     str_t string);
 
 sigma_fd_writer sigma_fd_writer_init(int fd);
 

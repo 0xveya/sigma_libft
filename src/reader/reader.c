@@ -98,26 +98,18 @@ void sigma_line_reader_deinit(sigma_line_reader *reader) {
   reader->reached_eof = true;
 }
 
-static sigma_line_result line_result(sigma_line_tag tag, char *items,
-                                     usize len) {
-  return (sigma_line_result){.tag = tag, .line = {.items = items, .len = len}};
-}
+RESULT(reader_refill_result, usize, sigma_line_error);
 
-static sigma_line_tag refill(sigma_line_reader *reader) {
-  reader->read_position = 0;
-  reader->read_length = 0;
+static reader_refill_result refill(sigma_line_reader *reader) {
   if (reader->reached_eof)
-    return sigma_line_eof;
+    return OK(reader_refill_result, 0);
+
   sigma_read_result_t result =
       s_read(reader->fd, reader->read_buffer, sizeof(reader->read_buffer));
   if (!result.ok)
-    return sigma_line_io_error;
-  if (result.value == 0) {
-    reader->reached_eof = true;
-    return sigma_line_eof;
-  }
-  reader->read_length = result.value;
-  return sigma_line_ok;
+    return ERR(reader_refill_result, sigma_line_io_error);
+  reader->reached_eof = result.value == 0;
+  return OK(reader_refill_result, result.value);
 }
 
 static bool reserve(sigma_line_reader *reader, usize required) {
@@ -154,18 +146,20 @@ sigma_line_result sigma_line_reader_next(sigma_line_reader *reader) {
 
   for (;;) {
     if (reader->read_position == reader->read_length) {
-      sigma_line_tag status = refill(reader);
-      if (status != sigma_line_ok) {
-        if (status == sigma_line_eof && length != 0)
+      usize count = TRY(sigma_line_result, refill(reader));
+      if (count == 0) {
+        if (length != 0)
           break;
-        return line_result(status, nullptr, 0);
+        return OK(sigma_line_result, NONE(sigma_optional_str));
       }
+      reader->read_position = 0;
+      reader->read_length = count;
     }
     usize available = reader->read_length - reader->read_position;
     usize chunk = sigma_reader_find_newline(
         reader->read_buffer + reader->read_position, available);
     if (length > SIZE_MAX - chunk - 1 || !reserve(reader, length + chunk + 1))
-      return line_result(sigma_line_out_of_memory, nullptr, 0);
+      return ERR(sigma_line_result, sigma_line_out_of_memory);
     ft_memcpy(reader->line_buffer + length,
               reader->read_buffer + reader->read_position, chunk);
     length += chunk;
@@ -178,5 +172,6 @@ sigma_line_result sigma_line_reader_next(sigma_line_reader *reader) {
     }
   }
   reader->line_buffer[length] = '\0';
-  return line_result(sigma_line_ok, reader->line_buffer, length);
+  str_t line = {.items = reader->line_buffer, .len = length};
+  return OK(sigma_line_result, SOME(sigma_optional_str, line));
 }

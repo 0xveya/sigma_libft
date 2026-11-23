@@ -3,14 +3,14 @@
 #include <sigma/string.h>
 #include <stdint.h>
 
-static bool ensure_capacity(string_t *string, usize additional) {
+static sigma_alloc_status ensure_capacity(string_t *string, usize additional) {
   if (additional > SIZE_MAX - string->len)
-    return false;
+    return ERR(sigma_alloc_status, sigma_alloc_size_overflow);
 
   usize required = string->len + additional;
 
   if (required <= string->cap)
-    return true;
+    return OK(sigma_alloc_status, sigma_unit);
 
   usize capacity = string->cap == 0 ? 8 : string->cap;
 
@@ -67,55 +67,50 @@ str_mut_t string_view_mut(string_t *string) {
 
 void string_clear(string_t *string) { string->len = 0; }
 
-bool string_reserve(string_t *string, usize capacity) {
+sigma_alloc_status string_reserve(string_t *string, usize capacity) {
   if (capacity <= string->cap)
-    return true;
-
-  if (capacity > SIZE_MAX / sizeof(char))
-    return false;
+    return OK(sigma_alloc_status, sigma_unit);
 
   char *items = allocator_realloc_aligned_debug(
       string->allocator, string->items, string->cap * sizeof(char),
       capacity * sizeof(char), _Alignof(char), __FILE__, __func__, __LINE__);
 
   if (items == NULL)
-    return false;
+    return ERR(sigma_alloc_status, sigma_alloc_out_of_memory);
 
   string->items = items;
   string->cap = capacity;
 
-  return true;
+  return OK(sigma_alloc_status, sigma_unit);
 }
 
-bool string_append(string_t *string, str_t suffix) {
+sigma_alloc_status string_append(string_t *string, str_t suffix) {
   if (suffix.len == 0)
-    return true;
+    return OK(sigma_alloc_status, sigma_unit);
 
-  if (!ensure_capacity(string, suffix.len))
-    return false;
+  (void)TRY(sigma_alloc_status, ensure_capacity(string, suffix.len));
 
   sigma_memcpy(string->items + string->len, suffix.items, suffix.len);
 
   string->len += suffix.len;
 
-  return true;
+  return OK(sigma_alloc_status, sigma_unit);
 }
 
-bool string_append_char(string_t *string, char c) {
-  if (!ensure_capacity(string, 1))
-    return false;
+sigma_alloc_status string_append_char(string_t *string, char c) {
+  (void)TRY(sigma_alloc_status, ensure_capacity(string, 1));
 
   string->items[string->len++] = c;
 
-  return true;
+  return OK(sigma_alloc_status, sigma_unit);
 }
 
-bool string_from_str(string_t *out, allocator_t allocator, str_t source) {
+sigma_alloc_status string_from_str(string_t *out, allocator_t allocator,
+                                   str_t source) {
   string_t result = string_init(allocator);
 
   if (source.len != 0) {
-    if (!string_reserve(&result, source.len))
-      return false;
+    (void)TRY(sigma_alloc_status, string_reserve(&result, source.len));
 
     sigma_memcpy(result.items, source.items, source.len);
 
@@ -124,9 +119,9 @@ bool string_from_str(string_t *out, allocator_t allocator, str_t source) {
 
   *out = result;
 
-  return true;
+  return OK(sigma_alloc_status, sigma_unit);
 }
 
 bool string_clone(string_t *out, const string_t *source) {
-  return string_from_str(out, source->allocator, string_view(source));
+  return string_from_str(out, source->allocator, string_view(source)).ok;
 }

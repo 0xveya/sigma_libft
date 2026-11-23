@@ -2,36 +2,34 @@
 
 /** Performs the sigma parse i32 operation. */
 sigma_parse_i32_result sigma_parse_i32(const char *text) {
-  sigma_parse_i32_result result = {.tag = sigma_parse_i32_invalid};
   const char *digits = text;
   u64 magnitude = 0;
   u64 limit = INT32_MAX;
 
   if (text == nullptr || *text == '\0')
-    return result;
+    return ERR(sigma_parse_i32_result, sigma_parse_i32_invalid);
   if (*digits == '+' || *digits == '-')
     digits++;
   if (*digits == '\0')
-    return result;
+    return ERR(sigma_parse_i32_result, sigma_parse_i32_invalid);
   if (*text == '-')
     limit++;
   while (*digits != '\0') {
     if (*digits < '0' || *digits > '9')
-      return result;
+      return ERR(sigma_parse_i32_result, sigma_parse_i32_invalid);
     u64 digit = (u64)(*digits - '0');
     if (magnitude > (limit - digit) / 10)
-      return (sigma_parse_i32_result){.tag = sigma_parse_i32_overflow};
+      return ERR(sigma_parse_i32_result, sigma_parse_i32_overflow);
     magnitude = magnitude * 10 + digit;
     digits++;
   }
-  result.tag = sigma_parse_i32_ok;
-  result.value = *text == '-' ? (i32) - (i64)magnitude : (i32)magnitude;
-  return result;
+  i32 value = *text == '-' ? (i32) - (i64)magnitude : (i32)magnitude;
+  return OK(sigma_parse_i32_result, value);
 }
 
 /** Performs the ft atoi operation. */
 int ft_atoi(const char *text) {
   sigma_parse_i32_result result = sigma_parse_i32(text);
 
-  return result.tag == sigma_parse_i32_ok ? result.value : 0;
+  return result.ok ? result.value : 0;
 }

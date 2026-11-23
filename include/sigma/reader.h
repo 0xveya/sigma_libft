@@ -7,17 +7,12 @@
 
 #define SIGMA_READER_BUFFER_SIZE 4096u
 
-typedef enum sigma_line_tag {
-  sigma_line_ok,
-  sigma_line_eof,
+typedef enum {
   sigma_line_io_error,
   sigma_line_out_of_memory,
-} sigma_line_tag;
+} sigma_line_error;
 
-typedef struct sigma_line_result {
-  sigma_line_tag tag;
-  str_t line;
-} sigma_line_result;
+RESULT(sigma_line_result, sigma_optional_str, sigma_line_error);
 
 typedef struct sigma_line_reader {
   i32 fd;

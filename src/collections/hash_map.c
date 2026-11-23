@@ -12,25 +12,30 @@ u64 sigma_str_hash(str_t string) {
 static sigma_map_entry *find_entry(sigma_map_entry *entries, usize capacity,
                                    str_t key) {
   usize index = sigma_str_hash(key) % capacity;
-  for (;;) {
+  for (usize tries = 0; tries < capacity; tries++) {
     sigma_map_entry *entry = &entries[index];
     if (!entry->occupied || str_eq(entry->key, key))
       return entry;
     index = (index + 1) % capacity;
   }
+  return nullptr;
 }
 
-static sigma_map_entry *alloc_entries(sigma_str_map *map, usize capacity) {
+RESULT(map_entries_result, sigma_map_entry *, sigma_map_error);
+
+static map_entries_result alloc_entries(sigma_str_map *map, usize capacity) {
+  if (capacity > SIZE_MAX / sizeof(sigma_map_entry))
+    return ERR(map_entries_result, sigma_map_capacity_overflow);
   if (map->allocator.vtable == nullptr ||
-      map->allocator.vtable->alloc == nullptr ||
-      capacity > SIZE_MAX / sizeof(sigma_map_entry))
-    return nullptr;
+      map->allocator.vtable->alloc == nullptr)
+    return ERR(map_entries_result, sigma_map_out_of_memory);
   sigma_map_entry *entries = map->allocator.vtable->alloc(
       map->allocator.ctx, capacity * sizeof(*entries),
       _Alignof(sigma_map_entry));
-  if (entries != nullptr)
-    ft_memset(entries, 0, capacity * sizeof(*entries));
-  return entries;
+  if (entries == nullptr)
+    return ERR(map_entries_result, sigma_map_out_of_memory);
+  ft_memset(entries, 0, capacity * sizeof(*entries));
+  return OK(map_entries_result, entries);
 }
 
 static void free_entries(sigma_str_map *map) {
@@ -41,35 +46,32 @@ static void free_entries(sigma_str_map *map) {
                                 _Alignof(sigma_map_entry));
 }
 
-static bool grow(sigma_str_map *map) {
+static sigma_map_status grow(sigma_str_map *map) {
   usize capacity = map->cap == 0 ? 8 : map->cap * 2;
   if (capacity < map->cap)
-    return false;
-  sigma_map_entry *entries = alloc_entries(map, capacity);
-  if (entries == nullptr)
-    return false;
+    return ERR(sigma_map_status, sigma_map_capacity_overflow);
+  sigma_map_entry *entries =
+      TRY(sigma_map_status, alloc_entries(map, capacity));
   for (usize i = 0; i < map->cap; i++)
     if (map->entries[i].occupied)
       *find_entry(entries, capacity, map->entries[i].key) = map->entries[i];
   free_entries(map);
   map->entries = entries;
   map->cap = capacity;
-  return true;
+  return OK(sigma_map_status, sigma_unit);
 }
 
 /** Performs the sigma str map init operation. */
-bool sigma_str_map_init(sigma_str_map *map, allocator_t allocator,
-                        usize capacity) {
+sigma_map_status sigma_str_map_init(sigma_str_map *map, allocator_t allocator,
+                                    usize capacity) {
   if (map == nullptr)
-    return false;
+    return ERR(sigma_map_status, sigma_map_invalid_argument);
   *map = (sigma_str_map){.allocator = allocator};
   if (capacity == 0)
-    return true;
-  map->entries = alloc_entries(map, capacity);
-  if (map->entries == nullptr)
-    return false;
+    return OK(sigma_map_status, sigma_unit);
+  map->entries = TRY(sigma_map_status, alloc_entries(map, capacity));
   map->cap = capacity;
-  return true;
+  return OK(sigma_map_status, sigma_unit);
 }
 
 /** Performs the sigma str map deinit operation. */
@@ -79,42 +81,35 @@ void sigma_str_map_deinit(sigma_str_map *map) {
 }
 
 /** Performs the sigma str map get operation. */
-str_t *sigma_str_map_get(sigma_str_map *map, str_t key) {
+sigma_map_value sigma_str_map_get(sigma_str_map *map, str_t key) {
   if (map == nullptr || map->cap == 0)
-    return nullptr;
-  usize index = sigma_str_hash(key) % map->cap;
-  for (usize tries = 0; tries < map->cap; tries++) {
-    sigma_map_entry *entry = &map->entries[index];
-    if (!entry->occupied)
-      return nullptr;
-    if (str_eq(entry->key, key))
-      return &entry->value;
-    index = (index + 1) % map->cap;
-  }
-  return nullptr;
+    return NONE(sigma_map_value);
+  sigma_map_entry *entry = find_entry(map->entries, map->cap, key);
+  if (entry == nullptr || !entry->occupied)
+    return NONE(sigma_map_value);
+  return SOME(sigma_map_value, &entry->value);
 }
 
 /** Performs the sigma str map has operation. */
 bool sigma_str_map_has(sigma_str_map *map, str_t key) {
-  return sigma_str_map_get(map, key) != nullptr;
+  return sigma_str_map_get(map, key).some;
 }
 
 /** Performs the sigma str map put operation. */
-bool sigma_str_map_put(sigma_str_map *map, str_t key, str_t value) {
+sigma_map_status sigma_str_map_put(sigma_str_map *map, str_t key, str_t value) {
   if (map == nullptr)
-    return false;
+    return ERR(sigma_map_status, sigma_map_invalid_argument);
   if (map->cap != 0) {
     sigma_map_entry *entry = find_entry(map->entries, map->cap, key);
-    if (entry->occupied) {
+    if (entry != nullptr && entry->occupied) {
       entry->value = value;
-      return true;
+      return OK(sigma_map_status, sigma_unit);
     }
   }
-  if (map->cap == 0 || (map->len + 1) * 100 > map->cap * 67)
-    if (!grow(map))
-      return false;
+  if (map->len == map->cap || (map->len + 1) * 100 > map->cap * 67)
+    (void)TRY(sigma_map_status, grow(map));
   sigma_map_entry *entry = find_entry(map->entries, map->cap, key);
   *entry = (sigma_map_entry){.key = key, .value = value, .occupied = true};
   map->len++;
-  return true;
+  return OK(sigma_map_status, sigma_unit);
 }

@@ -47,11 +47,12 @@ static bool point_format(sigma_writer writer, const void *value,
 
   switch (spec->presentation) {
   case SIGMA_FMT_PRESENT_DEFAULT:
-    return sigma_writer_fmt(writer, STR_LIT("({}, {})"), point->x, point->y);
+    return sigma_writer_fmt(writer, STR_LIT("({}, {})"), point->x, point->y).ok;
   case SIGMA_FMT_PRESENT_DEBUG:
-    return sigma_writer_str(writer, STR_LIT("point_t { x: ")) &&
-           sigma_writer_fmt(writer, STR_LIT("{}, y: {}"), point->x, point->y) &&
-           sigma_writer_str(writer, STR_LIT(" }"));
+    return sigma_writer_str(writer, STR_LIT("point_t { x: ")).ok &&
+           sigma_writer_fmt(writer, STR_LIT("{}, y: {}"), point->x, point->y)
+               .ok &&
+           sigma_writer_str(writer, STR_LIT(" }")).ok;
   default:
     return false;
   }
@@ -66,7 +67,7 @@ static bool format_test_case(str_t format, const sigma_fmt_arg_t *args,
   string_t output = string_init(format_test_allocator());
   sigma_string_writer sink = sigma_string_writer_init(&output);
   sigma_writer writer = sigma_string_writer_as_writer(&sink);
-  bool ok = sigma_format_args(writer, format, args, arg_count);
+  bool ok = sigma_format_args(writer, format, args, arg_count).ok;
   bool matches = ok && str_eq(string_view(&output), expected);
 
   string_deinit(&output);
@@ -167,9 +168,9 @@ bool sigma_test_format_runtime(void) {
   sigma_string_writer output_sink = sigma_string_writer_init(&output);
   sigma_writer output_writer = sigma_string_writer_as_writer(&output_sink);
   if (!sigma_format_args(
-          output_writer, STR_LIT("{} {:?} {:x} {:X} {:b}"),
-          (sigma_fmt_arg_t[]){data[0], data[0], data[0], data[0], data[0]},
-          5)) {
+           output_writer, STR_LIT("{} {:?} {:x} {:X} {:b}"),
+           (sigma_fmt_arg_t[]){data[0], data[0], data[0], data[0], data[0]}, 5)
+           .ok) {
     string_deinit(&output);
     return false;
   }
@@ -194,10 +195,10 @@ bool sigma_test_format_runtime(void) {
   });
   sigma_writer writer = sigma_fixed_writer_as_writer(&sink);
 
-  return !sigma_format_args(writer, STR_LIT("{}"), NULL, 0) &&
-         !sigma_format_args(writer, STR_LIT("{"), basic, 1) &&
-         !sigma_format_args(writer, STR_LIT("literal"), basic, 1) &&
-         !sigma_format_args(writer, STR_LIT("{}"), floating, 1);
+  return !sigma_format_args(writer, STR_LIT("{}"), NULL, 0).ok &&
+         !sigma_format_args(writer, STR_LIT("{"), basic, 1).ok &&
+         !sigma_format_args(writer, STR_LIT("literal"), basic, 1).ok &&
+         !sigma_format_args(writer, STR_LIT("{}"), floating, 1).ok;
 }
 
 bool sigma_test_format_macros(void) {
@@ -208,9 +209,9 @@ bool sigma_test_format_macros(void) {
   str_t name = STR_LIT("veya");
   const void *pointer = NULL;
 
-  bool ok = sigma_writer_fmt(writer, STR_LIT("x={} name={} "), x, name) &&
-            sigma_writer_fmt(writer, STR_LIT("hello world ")) &&
-            sigma_writer_fmt_lit(writer, "ptr={:p}", pointer);
+  bool ok = sigma_writer_fmt(writer, STR_LIT("x={} name={} "), x, name).ok &&
+            sigma_writer_fmt(writer, STR_LIT("hello world ")).ok &&
+            sigma_writer_fmt_lit(writer, "ptr={:p}", pointer).ok;
   bool matches = ok && str_eq(string_view(&output),
                               STR_LIT("x=42 name=veya hello world ptr=0x0"));
 
@@ -247,9 +248,9 @@ bool sigma_test_format_custom(void) {
   });
   sigma_writer writer = sigma_fixed_writer_as_writer(&sink);
 
-  return !sigma_format_args(writer, STR_LIT("{}"), &invalid[0], 1) &&
-         !sigma_format_args(writer, STR_LIT("{}"), &invalid[1], 1) &&
-         !sigma_format_args(writer, STR_LIT("{}"), &invalid[2], 1);
+  return !sigma_format_args(writer, STR_LIT("{}"), &invalid[0], 1).ok &&
+         !sigma_format_args(writer, STR_LIT("{}"), &invalid[1], 1).ok &&
+         !sigma_format_args(writer, STR_LIT("{}"), &invalid[2], 1).ok;
 }
 
 bool sigma_test_print_macro(void) {
@@ -270,7 +271,7 @@ bool sigma_test_print_macro(void) {
     return false;
   }
 
-  bool printed = sigma_print("hello {} age={}\n", STR_LIT("veya"), 42);
+  bool printed = sigma_print("hello {} age={}\n", STR_LIT("veya"), 42).ok;
   bool restored = dup2(saved, STDOUT_FILENO) == STDOUT_FILENO;
   close(saved);
   close(fds[1]);
@@ -288,15 +289,25 @@ bool sigma_test_printf_wrappers(void) {
   char fixed[32];
   char too_small[4] = {'x', 'x', 'x', '\0'};
 
-  if (!sigma_snprintf(fixed, sizeof(fixed), "value={} {}", 42, STR_LIT("ok")) ||
-      str_eq(str_from_cstr(fixed), STR_LIT("value=42 ok")) == false ||
-      sigma_snprintf(too_small, sizeof(too_small), "value={}", 42) ||
-      too_small[0] != '\0')
+  sigma_format_status printed_fixed =
+      sigma_snprintf(fixed, sizeof(fixed), "value={} {}", 42, STR_LIT("ok"));
+  sigma_format_status truncated =
+      sigma_snprintf(too_small, sizeof(too_small), "value={}", 42);
+  if (!printed_fixed.ok ||
+      !str_eq(str_from_cstr(fixed), STR_LIT("value=42 ok")) || truncated.ok ||
+      truncated.error != sigma_format_write_failed || too_small[0] != '\0')
+    return false;
+
+  sigma_fd_writer invalid_fd = sigma_fd_writer_init(-1);
+  sigma_writer_status write_status =
+      sigma_writer_str(sigma_fd_writer_as_writer(&invalid_fd), STR_LIT("x"));
+  if (write_status.ok || write_status.error != sigma_writer_io_error)
     return false;
 
   string_t allocated = {0};
   if (!sigma_asprintf(&allocated, format_test_allocator(), "owned={} {}", 42,
-                      STR_LIT("ok")) ||
+                      STR_LIT("ok"))
+           .ok ||
       !str_eq(string_view(&allocated), STR_LIT("owned=42 ok"))) {
     string_deinit(&allocated);
     return false;
@@ -306,7 +317,7 @@ bool sigma_test_printf_wrappers(void) {
   int fds[2];
   if (pipe(fds) != 0)
     return false;
-  bool printed = sigma_fprintf(fds[1], "fd={} {}", 42, STR_LIT("ok"));
+  bool printed = sigma_fprintf(fds[1], "fd={} {}", 42, STR_LIT("ok")).ok;
   close(fds[1]);
   char output[32];
   ssize_t count = read(fds[0], output, sizeof(output));

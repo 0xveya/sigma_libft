@@ -6,37 +6,45 @@ sigma_writer_is_valid(sigma_writer writer) {
   return writer.vtable != NULL && writer.vtable->write != NULL;
 }
 
-static bool sigma_fd_writer_write(void *ctx, bytes_t bytes) {
+static sigma_writer_status sigma_fd_writer_write(void *ctx, bytes_t bytes) {
   sigma_fd_writer *writer = ctx;
   usize offset = 0;
 
   while (offset < bytes.len) {
     sigma_write_result_t result =
         s_write(writer->fd, bytes.items + offset, bytes.len - offset);
-    if (!result.ok || result.value == 0)
-      return false;
+    if (!result.ok)
+      return ERR(sigma_writer_status, sigma_writer_io_error);
+    if (result.value == 0)
+      return ERR(sigma_writer_status, sigma_writer_no_progress);
     offset += result.value;
   }
-  return true;
+  return OK(sigma_writer_status, sigma_unit);
 }
 
-static bool sigma_string_writer_write(void *ctx, bytes_t bytes) {
+static sigma_writer_status sigma_string_writer_write(void *ctx, bytes_t bytes) {
   sigma_string_writer *writer = ctx;
 
-  return string_append(writer->string, (str_t){
-                                           .items = (const char *)bytes.items,
-                                           .len = bytes.len,
-                                       });
+  sigma_alloc_status status =
+      string_append(writer->string, (str_t){.items = (const char *)bytes.items,
+                                            .len = bytes.len});
+  if (!status.ok) {
+    sigma_writer_error error = status.error == sigma_alloc_size_overflow
+                                   ? sigma_writer_capacity_exceeded
+                                   : sigma_writer_out_of_memory;
+    return ERR(sigma_writer_status, error);
+  }
+  return OK(sigma_writer_status, sigma_unit);
 }
 
-static bool sigma_fixed_writer_write(void *ctx, bytes_t bytes) {
+static sigma_writer_status sigma_fixed_writer_write(void *ctx, bytes_t bytes) {
   sigma_fixed_writer *writer = ctx;
 
   if (bytes.len > writer->cap - writer->len)
-    return false;
+    return ERR(sigma_writer_status, sigma_writer_capacity_exceeded);
   ft_memcpy(writer->items + writer->len, bytes.items, bytes.len);
   writer->len += bytes.len;
-  return true;
+  return OK(sigma_writer_status, sigma_unit);
 }
 
 static const sigma_writer_vtable sigma_fd_writer_vtable = {
@@ -52,13 +60,14 @@ static const sigma_writer_vtable sigma_fixed_writer_vtable = {
 };
 
 /** Performs the sigma writer write operation. */
-bool sigma_writer_write(sigma_writer writer, bytes_t bytes) {
-  return sigma_writer_is_valid(writer) &&
-         writer.vtable->write(writer.ctx, bytes);
+sigma_writer_status sigma_writer_write(sigma_writer writer, bytes_t bytes) {
+  if (!sigma_writer_is_valid(writer))
+    return ERR(sigma_writer_status, sigma_writer_invalid);
+  return writer.vtable->write(writer.ctx, bytes);
 }
 
 /** Performs the sigma writer str operation. */
-bool sigma_writer_str(sigma_writer writer, str_t string) {
+sigma_writer_status sigma_writer_str(sigma_writer writer, str_t string) {
   return sigma_writer_write(writer, str_bytes(string));
 }
 

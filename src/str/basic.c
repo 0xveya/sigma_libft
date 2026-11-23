@@ -10,18 +10,18 @@ str_t str_from_cstr(const char *s) {
 }
 
 /** Performs the str to cstr operation. */
-char *str_to_cstr(str_t s, allocator_t allocator) {
-  if (s.len == SIGMA_NPOS)
-    return NULL;
+sigma_cstr_result str_to_cstr(str_t s, allocator_t allocator) {
+  if (s.len == SIZE_MAX)
+    return ERR(sigma_cstr_result, sigma_alloc_size_overflow);
 
   char *result = allocator_array(allocator, char, s.len + 1);
   if (result == NULL)
-    return NULL;
+    return ERR(sigma_cstr_result, sigma_alloc_out_of_memory);
 
   for (usize i = 0; i < s.len; i++)
     result[i] = s.items[i];
   result[s.len] = '\0';
-  return result;
+  return OK(sigma_cstr_result, result);
 }
 
 /** Performs the str is empty operation. */

@@ -83,7 +83,7 @@ static bool test_trivial_vec(allocator_t allocator) {
   test_i32_vec source = test_i32_vec_init(allocator);
 
   for (i32 value = 0; value < 9; ++value) {
-    if (!test_i32_vec_push(&source, value))
+    if (!test_i32_vec_push(&source, value).ok)
       return false;
   }
 
@@ -93,12 +93,13 @@ static bool test_trivial_vec(allocator_t allocator) {
     return false;
 
   view_mut.items[0] = 42;
-  if (*test_i32_vec_get(&source, 0) != 42 ||
-      test_i32_vec_get_const(&source, 9) != NULL)
+  test_i32_vec_ref first = test_i32_vec_get(&source, 0);
+  if (!first.some || *first.value != 42 ||
+      test_i32_vec_get_const(&source, 9).some)
     return false;
 
-  i32 popped = 0;
-  if (!test_i32_vec_pop(&source, &popped) || popped != 8)
+  test_i32_vec_optional popped = test_i32_vec_pop(&source);
+  if (!popped.some || popped.value != 8)
     return false;
 
   test_i32_vec moved = test_i32_vec_take(&source);
@@ -143,7 +144,7 @@ static bool test_owned_vec_contract(allocator_t allocator,
     return false;
 
   ctx->fail_alloc = true;
-  if (test_owned_vec_push_take(&vec, &first) || first.ptr == NULL ||
+  if (test_owned_vec_push_take(&vec, &first).ok || first.ptr == NULL ||
       vec.items != NULL || vec.len != 0) {
     owned_int_deinit(&first);
     owned_int_deinit(&second);
@@ -151,8 +152,8 @@ static bool test_owned_vec_contract(allocator_t allocator,
   }
 
   ctx->fail_alloc = false;
-  if (!test_owned_vec_push_take(&vec, &first) || first.ptr != NULL ||
-      !test_owned_vec_push_take(&vec, &second) || second.ptr != NULL)
+  if (!test_owned_vec_push_take(&vec, &first).ok || first.ptr != NULL ||
+      !test_owned_vec_push_take(&vec, &second).ok || second.ptr != NULL)
     return false;
 
   owned_int_t popped = {0};

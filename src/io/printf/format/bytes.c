@@ -29,7 +29,7 @@ static bool sigma_fmt_write_byte_digits(sigma_writer writer, u8 value,
     usize offset = len - index - 1;
     buffer[index] = digits[(value >> (offset * shift)) & ((1U << shift) - 1)];
   }
-  return sigma_writer_str(writer, (str_t){.items = buffer, .len = len});
+  return sigma_writer_str(writer, (str_t){.items = buffer, .len = len}).ok;
 }
 
 static bool sigma_fmt_write_bytes_body(sigma_writer writer, bytes_t value,
@@ -43,15 +43,16 @@ static bool sigma_fmt_write_bytes_body(sigma_writer writer, bytes_t value,
 
   if (spec->presentation == SIGMA_FMT_PRESENT_DEFAULT)
     return sigma_writer_write(writer,
-                              (bytes_t){.items = value.items, .len = len});
+                              (bytes_t){.items = value.items, .len = len})
+        .ok;
   if (spec->presentation == SIGMA_FMT_PRESENT_DEBUG &&
-      !sigma_writer_str(writer, STR_LIT("[")))
+      !sigma_writer_str(writer, STR_LIT("[")).ok)
     return false;
   for (usize index = 0; index < len; index++) {
     if (spec->presentation == SIGMA_FMT_PRESENT_DEBUG) {
-      if (index != 0 && !sigma_writer_str(writer, STR_LIT(", ")))
+      if (index != 0 && !sigma_writer_str(writer, STR_LIT(", ")).ok)
         return false;
-      if (!sigma_writer_str(writer, STR_LIT("0x")) ||
+      if (!sigma_writer_str(writer, STR_LIT("0x")).ok ||
           !sigma_fmt_write_byte_digits(writer, value.items[index], 4, hex))
         return false;
     } else if (!sigma_fmt_write_byte_digits(
@@ -61,7 +62,7 @@ static bool sigma_fmt_write_bytes_body(sigma_writer writer, bytes_t value,
       return false;
   }
   return spec->presentation != SIGMA_FMT_PRESENT_DEBUG ||
-         sigma_writer_str(writer, STR_LIT("]"));
+         sigma_writer_str(writer, STR_LIT("]")).ok;
 }
 
 /** Performs the sigma fmt write bytes operation. */

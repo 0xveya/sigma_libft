@@ -104,11 +104,12 @@ static mem_find_fn select_mem_find(void) {
 }
 
 /** Performs the mem find operation. */
-usize mem_find(const void *ptr, usize len, u8 value) {
+sigma_offset mem_find(const void *ptr, usize len, u8 value) {
   static mem_find_fn implementation;
 
   if (implementation == nullptr)
     implementation = select_mem_find();
 
-  return implementation(ptr, len, value);
+  usize offset = implementation(ptr, len, value);
+  return offset == SIGMA_NPOS ? NONE(sigma_offset) : SOME(sigma_offset, offset);
 }

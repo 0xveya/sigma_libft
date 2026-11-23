@@ -39,7 +39,8 @@ str_mut_t string_view_mut(string_t *string);
 
 /* Ensures at least capacity bytes of storage without changing the string on
  * failure. */
-bool string_reserve(string_t *string, usize capacity);
+SIGMA_NODISCARD sigma_alloc_status string_reserve(string_t *string,
+                                                  usize capacity);
 
 /* Mutation */
 
@@ -49,10 +50,11 @@ bool string_reserve(string_t *string, usize capacity);
  * suffix must not alias storage that growth could invalidate. The string is
  * unchanged when allocation fails.
  */
-bool string_append(string_t *string, str_t suffix);
+SIGMA_NODISCARD sigma_alloc_status string_append(string_t *string,
+                                                 str_t suffix);
 
 /* Appends one character, leaving the string unchanged on allocation failure. */
-bool string_append_char(string_t *string, char c);
+SIGMA_NODISCARD sigma_alloc_status string_append_char(string_t *string, char c);
 
 /* Removes all characters while retaining the backing allocation. */
 void string_clear(string_t *string);
@@ -65,7 +67,9 @@ void string_clear(string_t *string);
  * On failure, out is untouched. out must not own a live resource because a
  * successful copy overwrites it without deinitializing it.
  */
-bool string_from_str(string_t *out, allocator_t allocator, str_t source);
+SIGMA_NODISCARD sigma_alloc_status string_from_str(string_t *out,
+                                                   allocator_t allocator,
+                                                   str_t source);
 
-/* Clones source into an empty out value using source's allocator. */
+/* Clones source through the boolean ownership trait contract. */
 bool string_clone(string_t *out, const string_t *source);

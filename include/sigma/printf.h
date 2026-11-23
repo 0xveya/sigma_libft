@@ -232,14 +232,25 @@ sigma_fmt_arg_custom(const void *value, const sigma_formatter_vtable *vtable) {
   };
 }
 
+typedef enum {
+  sigma_format_invalid_destination,
+  sigma_format_invalid_field,
+  sigma_format_argument_count,
+  sigma_format_write_failed,
+  sigma_format_argument_failed,
+} sigma_format_error;
+
+RESULT(sigma_format_status, sigma_unit_t, sigma_format_error);
+
 /*
  * Formats an already type-erased argument array into writer.
  *
  * format and every argument are borrowed for the duration of the call.
  * Formatting never takes ownership of an argument.
  */
-bool sigma_format_args(sigma_writer writer, str_t format,
-                       const sigma_fmt_arg_t *args, usize arg_count);
+SIGMA_NODISCARD sigma_format_status
+sigma_format_args(sigma_writer writer, str_t format,
+                  const sigma_fmt_arg_t *args, usize arg_count);
 
 /* Pointer-taking adapters keep copied values alive through the format call. */
 #define SIGMA_FORMAT_REF_DEFINE(tag, type, constructor)                        \
@@ -306,28 +317,30 @@ SIGMA_CUSTOM_FORMAT_TYPES(SIGMA_CUSTOM_FORMAT_REF_DEFINE)
   sigma_writer_fmt((writer), STR_LIT(format) __VA_OPT__(, __VA_ARGS__))
 
 /* Formats borrowed arguments to an fd and reports write/format failure. */
-bool sigma_fprint_args(int fd, str_t format, const sigma_fmt_arg_t *args,
-                       usize arg_count);
+SIGMA_NODISCARD sigma_format_status sigma_fprint_args(
+    int fd, str_t format, const sigma_fmt_arg_t *args, usize arg_count);
 
 /*
  * Formats into buffer and always reserves one byte for NUL.
  *
- * Returns false for a null/empty buffer, invalid formatting, or truncation.
+ * Reports an error for a null/empty buffer, invalid formatting, or truncation.
  */
-bool sigma_snprint_args(char *buffer, usize capacity, str_t format,
-                        const sigma_fmt_arg_t *args, usize arg_count);
+SIGMA_NODISCARD sigma_format_status
+sigma_snprint_args(char *buffer, usize capacity, str_t format,
+                   const sigma_fmt_arg_t *args, usize arg_count);
 
 /*
  * Allocates a formatted owning string without changing out on failure.
  *
  * out must not already own storage. The caller owns the result on success.
  */
-bool sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
-                        const sigma_fmt_arg_t *args, usize arg_count);
+SIGMA_NODISCARD sigma_format_status
+sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
+                   const sigma_fmt_arg_t *args, usize arg_count);
 
 /* Formats borrowed arguments to stdout. */
-bool sigma_print_args(str_t format, const sigma_fmt_arg_t *args,
-                      usize arg_count);
+SIGMA_NODISCARD sigma_format_status
+sigma_print_args(str_t format, const sigma_fmt_arg_t *args, usize arg_count);
 
 #define sigma_fprintf(fd, format, ...)                                         \
   sigma_fprint_args((fd), STR_LIT(format), SIGMA_FMT_ARGS(__VA_ARGS__),        \

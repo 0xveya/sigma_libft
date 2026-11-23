@@ -123,12 +123,13 @@ static bool sigma_fmt_write_integer(sigma_writer writer,
   if (!sigma_fmt_write_repeat(writer, spec->fill, left))
     return false;
   if (integer.sign != '\0' &&
-      !sigma_writer_str(writer, (str_t){.items = &integer.sign, .len = 1}))
+      !sigma_writer_str(writer, (str_t){.items = &integer.sign, .len = 1}).ok)
     return false;
-  return sigma_writer_str(writer, integer.prefix) &&
+  return sigma_writer_str(writer, integer.prefix).ok &&
          sigma_fmt_write_repeat(writer, '0', zeroes) &&
          sigma_writer_str(writer, (str_t){.items = integer.digits,
-                                          .len = integer.digits_len}) &&
+                                          .len = integer.digits_len})
+             .ok &&
          sigma_fmt_write_repeat(writer, spec->fill, right);
 }
 

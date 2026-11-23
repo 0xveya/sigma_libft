@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sigma/result.h>
 #include <sigma/types.h>
 
 #include <stdbool.h>
@@ -15,47 +16,18 @@ typedef struct sigma_sys_error {
   i32 code;
 } sigma_sys_error_t;
 
-typedef struct sigma_sys_result {
-  bool ok;
-  union {
-    iptr value;
-    sigma_sys_error_t error;
-  };
-} sigma_sys_result_t;
-
-typedef struct sigma_read_result {
-  bool ok;
-  union {
-    usize value;
-    sigma_sys_error_t error;
-  };
-} sigma_read_result_t;
-
-typedef struct sigma_write_result {
-  bool ok;
-  union {
-    usize value;
-    sigma_sys_error_t error;
-  };
-} sigma_write_result_t;
-
-typedef struct sigma_mmap_result {
-  bool ok;
-  union {
-    void *value;
-    sigma_sys_error_t error;
-  };
-} sigma_mmap_result_t;
-
-typedef struct sigma_munmap_result {
-  bool ok;
-  sigma_sys_error_t error;
-} sigma_munmap_result_t;
-
-typedef struct sigma_status_result {
-  bool ok;
-  sigma_sys_error_t error;
-} sigma_status_result_t;
+RESULT(sigma_sys_result, iptr, sigma_sys_error_t);
+typedef sigma_sys_result sigma_sys_result_t;
+RESULT(sigma_read_result, usize, sigma_sys_error_t);
+typedef sigma_read_result sigma_read_result_t;
+RESULT(sigma_write_result, usize, sigma_sys_error_t);
+typedef sigma_write_result sigma_write_result_t;
+RESULT(sigma_mmap_result, void *, sigma_sys_error_t);
+typedef sigma_mmap_result sigma_mmap_result_t;
+RESULT(sigma_munmap_result, sigma_unit_t, sigma_sys_error_t);
+typedef sigma_munmap_result sigma_munmap_result_t;
+RESULT(sigma_status_result, sigma_unit_t, sigma_sys_error_t);
+typedef sigma_status_result sigma_status_result_t;
 
 typedef enum sigma_arch_operation {
   SIGMA_ARCH_SET_FS = 0x1002,

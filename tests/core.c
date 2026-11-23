@@ -48,9 +48,11 @@ static void *identity(void *ptr) { return ptr; }
 
 bool sigma_test_conversion_and_memory(void) {
   sigma_parse_i32_result min = sigma_parse_i32("-2147483648");
-  CHECK(min.tag == sigma_parse_i32_ok && min.value == INT32_MIN);
-  CHECK(sigma_parse_i32("12nope").tag == sigma_parse_i32_invalid);
-  CHECK(sigma_parse_i32("2147483648").tag == sigma_parse_i32_overflow);
+  CHECK(min.ok && min.value == INT32_MIN);
+  sigma_parse_i32_result invalid = sigma_parse_i32("12nope");
+  sigma_parse_i32_result overflow = sigma_parse_i32("2147483648");
+  CHECK(!invalid.ok && invalid.error == sigma_parse_i32_invalid);
+  CHECK(!overflow.ok && overflow.error == sigma_parse_i32_overflow);
   CHECK(ft_atoi("-42") == -42);
 
   char *integer = ft_itoa(INT32_MIN);
@@ -82,8 +84,9 @@ bool sigma_test_conversion_and_memory(void) {
 
   const u8 left[] = {1, 2, 3, 4};
   const u8 right[] = {1, 2, 4, 0};
-  CHECK(mem_find(left, 3, 3) == 2 && mem_find(left, 2, 3) == SIGMA_NPOS);
-  CHECK(mem_find(NULL, 0, 0) == SIGMA_NPOS);
+  sigma_offset match = mem_find(left, 3, 3);
+  CHECK(match.some && match.value == 2 && !mem_find(left, 2, 3).some);
+  CHECK(!mem_find(NULL, 0, 0).some);
   CHECK(mem_cmp(left, right, 2) == 0 && mem_cmp(left, right, 3) < 0);
 
   u8 simd_left[257];
@@ -99,8 +102,9 @@ bool sigma_test_conversion_and_memory(void) {
     simd_right[position] = simd_left[position];
   }
   simd_left[256] = 0xff;
-  CHECK(mem_find(simd_left, sizeof(simd_left), 0xff) == 256);
-  CHECK(mem_find(simd_left, 256, 0xff) == SIGMA_NPOS);
+  sigma_offset tail = mem_find(simd_left, sizeof(simd_left), 0xff);
+  CHECK(tail.some && tail.value == 256);
+  CHECK(!mem_find(simd_left, 256, 0xff).some);
   return true;
 }
 
@@ -149,20 +153,21 @@ bool sigma_test_strings_and_bytes(void) {
   CHECK(str_cmp(STR_LIT("abc"), STR_LIT("abd")) < 0);
   CHECK(str_starts_with(text, STR_LIT("alpha")));
   CHECK(str_ends_with(text, STR_LIT("bet")));
-  CHECK(str_find_byte(STR_LIT("abca"), 'a') == 0);
-  CHECK(str_rfind_byte(STR_LIT("abca"), 'a') == 3);
-  CHECK(str_find_byte(STR_LIT("abca"), 'x') == SIGMA_NPOS);
+  sigma_offset first_a = str_find_byte(STR_LIT("abca"), 'a');
+  sigma_offset last_a = str_rfind_byte(STR_LIT("abca"), 'a');
+  CHECK(first_a.some && first_a.value == 0);
+  CHECK(last_a.some && last_a.value == 3);
+  CHECK(!str_find_byte(STR_LIT("abca"), 'x').some);
   CHECK(str_eq(str_trim_ascii(STR_LIT(" \t hello \r\n")), STR_LIT("hello")));
 
   str_split_scalar_t split = str_split_scalar(STR_LIT("a::b:"), ':');
   const str_t expected[] = {STR_LIT("a"), STR_LIT(""), STR_LIT("b"),
                             STR_LIT("")};
-  str_t part;
   for (usize index = 0; index < 4; ++index) {
-    CHECK(str_split_scalar_next(&split, &part));
-    CHECK(str_eq(part, expected[index]));
+    sigma_optional_str part = str_split_scalar_next(&split);
+    CHECK(part.some && str_eq(part.value, expected[index]));
   }
-  CHECK(!str_split_scalar_next(&split, &part));
+  CHECK(!str_split_scalar_next(&split).some);
 
   const u8 raw[] = {0, 1, 2, 3};
   bytes_t bytes = {.items = raw, .len = sizeof(raw)};
@@ -170,7 +175,9 @@ bool sigma_test_strings_and_bytes(void) {
   CHECK(bytes_is_empty((bytes_t){0}));
   CHECK(bytes_eq(bytes_sub(bytes, 1, 2),
                  ((bytes_t){.items = raw + 1, .len = 2})));
-  CHECK(bytes_find(bytes, 2) == 2 && bytes_rfind(bytes, 0) == 0);
+  sigma_offset two = bytes_find(bytes, 2);
+  sigma_offset zero = bytes_rfind(bytes, 0);
+  CHECK(two.some && two.value == 2 && zero.some && zero.value == 0);
   CHECK(bytes_cmp((bytes_t){.items = (u8[]){0, 0xff}, .len = 2},
                   (bytes_t){.items = (u8[]){0, 0}, .len = 2}) > 0);
   CHECK(bytes_sub(bytes, 99, 99).len == 0);
@@ -184,10 +191,10 @@ bool sigma_test_strings_and_bytes(void) {
 
   alloc_count = 0;
   free_count = 0;
-  char *converted =
+  sigma_cstr_result converted =
       str_to_cstr((str_t){.items = "a\0b", .len = 3}, test_allocator());
-  CHECK(converted != NULL && memcmp(converted, "a\0b\0", 4) == 0);
-  test_free(NULL, converted, 4, alignof(max_align_t));
+  CHECK(converted.ok && memcmp(converted.value, "a\0b\0", 4) == 0);
+  test_free(NULL, converted.value, 4, alignof(max_align_t));
   CHECK(alloc_count == 1 && free_count == 1);
   return true;
 }
@@ -234,23 +241,30 @@ bool sigma_test_characters(void) {
 
 bool sigma_test_collections_and_reader(void) {
   sigma_str_map map;
-  CHECK(sigma_str_map_init(&map, test_allocator(), 0));
+  CHECK(sigma_str_map_init(&map, test_allocator(), 0).ok);
   CHECK(sigma_str_hash(STR_LIT("left")) != sigma_str_hash(STR_LIT("right")));
-  CHECK(sigma_str_map_put(&map, STR_LIT("key"), STR_LIT("value")));
+  CHECK(sigma_str_map_put(&map, STR_LIT("key"), STR_LIT("value")).ok);
   CHECK(sigma_str_map_has(&map, STR_LIT("key")));
-  str_t *found = sigma_str_map_get(&map, STR_LIT("key"));
-  CHECK(found != NULL && str_eq(*found, STR_LIT("value")));
+  sigma_map_value found = sigma_str_map_get(&map, STR_LIT("key"));
+  CHECK(found.some && str_eq(*found.value, STR_LIT("value")));
+  CHECK(!sigma_str_map_get(&map, STR_LIT("missing")).some);
   sigma_str_map_deinit(&map);
   CHECK(map.cap == 0);
 
   sigma_str_map sized_map;
-  CHECK(sigma_str_map_init(&sized_map, test_allocator(), 4));
+  CHECK(sigma_str_map_init(&sized_map, test_allocator(), 4).ok);
   CHECK(sized_map.cap == 4);
   sigma_str_map_deinit(&sized_map);
 
+  sigma_map_status overflow =
+      sigma_str_map_init(&sized_map, test_allocator(), SIZE_MAX);
+  CHECK(!overflow.ok && overflow.error == sigma_map_capacity_overflow);
+  CHECK(sized_map.cap == 0 && sized_map.entries == NULL);
+
   sigma_line_reader invalid_reader;
   sigma_line_reader_init(&invalid_reader, -1, test_allocator());
-  CHECK(invalid_reader.fd == -1);
+  sigma_line_result invalid = sigma_line_reader_next(&invalid_reader);
+  CHECK(!invalid.ok && invalid.error == sigma_line_io_error);
   sigma_line_reader_deinit(&invalid_reader);
   CHECK(invalid_reader.reached_eof);
 
@@ -263,11 +277,13 @@ bool sigma_test_collections_and_reader(void) {
   sigma_line_reader reader;
   sigma_line_reader_init(&reader, fds[0], test_allocator());
   sigma_line_result first = sigma_line_reader_next(&reader);
-  CHECK(first.tag == sigma_line_ok && str_eq(first.line, STR_LIT("first")));
+  CHECK(first.ok && first.value.some &&
+        str_eq(first.value.value, STR_LIT("first")));
   sigma_line_result second = sigma_line_reader_next(&reader);
-  CHECK(second.tag == sigma_line_ok && str_eq(second.line, STR_LIT("second")));
+  CHECK(second.ok && second.value.some &&
+        str_eq(second.value.value, STR_LIT("second")));
   sigma_line_result eof = sigma_line_reader_next(&reader);
-  CHECK(eof.tag == sigma_line_eof);
+  CHECK(eof.ok && !eof.value.some);
   sigma_line_reader_deinit(&reader);
   close(fds[0]);
 
@@ -282,8 +298,8 @@ bool sigma_test_collections_and_reader(void) {
   close(fds[1]);
   sigma_line_reader_init(&reader, fds[0], test_allocator());
   sigma_line_result long_line = sigma_line_reader_next(&reader);
-  CHECK(long_line.tag == sigma_line_ok &&
-        long_line.line.len == sizeof(long_input) - 1);
+  CHECK(long_line.ok && long_line.value.some &&
+        long_line.value.value.len == sizeof(long_input) - 1);
   CHECK(reader.arena.blocks != NULL);
   sigma_line_reader_deinit(&reader);
   CHECK(reader.arena.blocks == NULL && alloc_count > 0 &&

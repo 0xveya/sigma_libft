@@ -48,9 +48,9 @@ static bool string_test_basics(allocator_t allocator,
                                string_test_allocator_ctx_t *ctx) {
   string_t string = string_init(allocator);
 
-  if (!string_append(&string, STR_LIT("hello")) ||
-      !string_append_char(&string, ' ') ||
-      !string_append(&string, STR_LIT("sigma")) ||
+  if (!string_append(&string, STR_LIT("hello")).ok ||
+      !string_append_char(&string, ' ').ok ||
+      !string_append(&string, STR_LIT("sigma")).ok ||
       !str_eq(string_view(&string), STR_LIT("hello sigma")))
     return false;
 
@@ -58,14 +58,15 @@ static bool string_test_basics(allocator_t allocator,
   string_view_mut(&string).items[0] = 'H';
   string_clear(&string);
   if (string.len != 0 || string.cap != cap ||
-      !string_append(&string, STR_LIT("Hi")))
+      !string_append(&string, STR_LIT("Hi")).ok)
     return false;
 
   ctx->fail_alloc = true;
   char *items = string.items;
   usize len = string.len;
-  if (string_reserve(&string, cap + 1) || string.items != items ||
-      string.len != len || string.cap != cap)
+  sigma_alloc_status reserve = string_reserve(&string, cap + 1);
+  if (reserve.ok || reserve.error != sigma_alloc_out_of_memory ||
+      string.items != items || string.len != len || string.cap != cap)
     return false;
   ctx->fail_alloc = false;
 
@@ -83,7 +84,7 @@ static bool string_test_basics(allocator_t allocator,
 static bool string_test_clone(allocator_t allocator,
                               string_test_allocator_ctx_t *ctx) {
   string_t clone = {0};
-  if (!string_from_str(&clone, allocator, STR_LIT("sigma")) ||
+  if (!string_from_str(&clone, allocator, STR_LIT("sigma")).ok ||
       !str_eq(string_view(&clone), STR_LIT("sigma")))
     return false;
 
@@ -94,7 +95,7 @@ static bool string_test_clone(allocator_t allocator,
 
   string_t untouched = string_init(allocator);
   ctx->fail_alloc = true;
-  if (string_from_str(&untouched, allocator, STR_LIT("failure")) ||
+  if (string_from_str(&untouched, allocator, STR_LIT("failure")).ok ||
       untouched.items != NULL || untouched.len != 0 || untouched.cap != 0 ||
       untouched.allocator.vtable != allocator.vtable)
     return false;
@@ -112,14 +113,14 @@ static bool string_test_vec(allocator_t allocator) {
   string_t second = {0};
   string_t third = {0};
 
-  if (!string_from_str(&first, allocator, STR_LIT("foo")) ||
-      !string_from_str(&second, allocator, STR_LIT("bar")) ||
-      !string_from_str(&third, allocator, STR_LIT("baz")))
+  if (!string_from_str(&first, allocator, STR_LIT("foo")).ok ||
+      !string_from_str(&second, allocator, STR_LIT("bar")).ok ||
+      !string_from_str(&third, allocator, STR_LIT("baz")).ok)
     return false;
 
-  if (!string_vec_push_take(&strings, &first) || first.items != NULL ||
-      !string_vec_push_take(&strings, &second) || second.items != NULL ||
-      !string_vec_push_take(&strings, &third) || third.items != NULL ||
+  if (!string_vec_push_take(&strings, &first).ok || first.items != NULL ||
+      !string_vec_push_take(&strings, &second).ok || second.items != NULL ||
+      !string_vec_push_take(&strings, &third).ok || third.items != NULL ||
       strings.len != 3 ||
       !str_eq(string_view(&strings.items[0]), STR_LIT("foo")) ||
       !str_eq(string_view(&strings.items[1]), STR_LIT("bar")) ||
@@ -150,8 +151,8 @@ static bool string_test_registry(allocator_t allocator) {
   string_t destination = {0};
   string_t source = {0};
 
-  if (!string_from_str(&destination, allocator, STR_LIT("old")) ||
-      !string_from_str(&source, allocator, STR_LIT("new")))
+  if (!string_from_str(&destination, allocator, STR_LIT("old")).ok ||
+      !string_from_str(&source, allocator, STR_LIT("new")).ok)
     return false;
 
   sigma_replace(destination, source);
@@ -160,7 +161,7 @@ static bool string_test_registry(allocator_t allocator) {
     return false;
 
   string_vec strings = string_vec_init(allocator);
-  if (!string_vec_push_take(&strings, &destination) ||
+  if (!string_vec_push_take(&strings, &destination).ok ||
       destination.items != NULL)
     return false;
 

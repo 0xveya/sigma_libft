@@ -21,6 +21,7 @@ bool sigma_fmt_write_str(sigma_writer writer, str_t value,
   usize right = pad - left;
 
   return sigma_fmt_write_repeat(writer, spec->fill, left) &&
-         sigma_writer_str(writer, (str_t){.items = value.items, .len = len}) &&
+         sigma_writer_str(writer, (str_t){.items = value.items, .len = len})
+             .ok &&
          sigma_fmt_write_repeat(writer, spec->fill, right);
 }

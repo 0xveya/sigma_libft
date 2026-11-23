@@ -3,8 +3,17 @@
 #include <sigma/attributes.h>
 #include <sigma/qol.h>
 
-/* Returns the first matching byte offset, or SIGMA_NPOS when absent. */
-usize mem_find(const void *ptr, usize len, u8 value);
+typedef enum {
+  sigma_alloc_out_of_memory,
+  sigma_alloc_size_overflow,
+} sigma_alloc_error;
+
+RESULT(sigma_alloc_status, sigma_unit_t, sigma_alloc_error);
+
+OPTIONAL(sigma_offset, usize);
+
+/* Returns the first matching byte offset, or None when absent. */
+SIGMA_NODISCARD sigma_offset mem_find(const void *ptr, usize len, u8 value);
 
 /* Compares exactly len bytes as unsigned values. */
 i32 mem_cmp(const void *a, const void *b, usize len);

@@ -12,7 +12,7 @@ bool sigma_fmt_write_repeat(sigma_writer writer, u32 fill, usize count) {
   while (count > 0) {
     usize chunk = count < sizeof(buffer) ? count : sizeof(buffer);
 
-    if (!sigma_writer_str(writer, (str_t){.items = buffer, .len = chunk}))
+    if (!sigma_writer_str(writer, (str_t){.items = buffer, .len = chunk}).ok)
       return false;
     count -= chunk;
   }
@@ -61,8 +61,9 @@ bool sigma_fmt_write_arg(sigma_writer writer, sigma_fmt_arg_t arg,
 }
 
 /** Performs the sigma format args operation. */
-bool sigma_format_args(sigma_writer writer, str_t format,
-                       const sigma_fmt_arg_t *args, usize arg_count) {
+sigma_format_status sigma_format_args(sigma_writer writer, str_t format,
+                                      const sigma_fmt_arg_t *args,
+                                      usize arg_count) {
   usize pos = 0;
   usize arg = 0;
   usize literal_start = 0;
@@ -79,12 +80,12 @@ bool sigma_format_args(sigma_writer writer, str_t format,
           .len = pos - literal_start,
       };
 
-      if (!sigma_writer_str(writer, literal))
-        return false;
+      if (!sigma_writer_str(writer, literal).ok)
+        return ERR(sigma_format_status, sigma_format_write_failed);
     }
 
     if (arg >= arg_count)
-      return false;
+      return ERR(sigma_format_status, sigma_format_argument_count);
 
     sigma_fmt_field field;
 
@@ -96,10 +97,10 @@ bool sigma_format_args(sigma_writer writer, str_t format,
         &field);
 
     if (result != SIGMA_FMT_PARSE_OK)
-      return false;
+      return ERR(sigma_format_status, sigma_format_invalid_field);
 
     if (!sigma_fmt_write_arg(writer, args[arg], &field.spec))
-      return false;
+      return ERR(sigma_format_status, sigma_format_argument_failed);
 
     arg++;
     pos += field.consumed;
@@ -112,16 +113,19 @@ bool sigma_format_args(sigma_writer writer, str_t format,
         .len = format.len - literal_start,
     };
 
-    if (!sigma_writer_str(writer, literal))
-      return false;
+    if (!sigma_writer_str(writer, literal).ok)
+      return ERR(sigma_format_status, sigma_format_write_failed);
   }
 
-  return arg == arg_count;
+  if (arg != arg_count)
+    return ERR(sigma_format_status, sigma_format_argument_count);
+  return OK(sigma_format_status, sigma_unit);
 }
 
 /** Performs the sigma fprint args operation. */
-bool sigma_fprint_args(int fd, str_t format, const sigma_fmt_arg_t *args,
-                       usize arg_count) {
+sigma_format_status sigma_fprint_args(int fd, str_t format,
+                                      const sigma_fmt_arg_t *args,
+                                      usize arg_count) {
   sigma_fd_writer writer = sigma_fd_writer_init(fd);
 
   return sigma_format_args(sigma_fd_writer_as_writer(&writer), format, args,
@@ -129,43 +133,48 @@ bool sigma_fprint_args(int fd, str_t format, const sigma_fmt_arg_t *args,
 }
 
 /** Performs the sigma snprint args operation. */
-bool sigma_snprint_args(char *buffer, usize capacity, str_t format,
-                        const sigma_fmt_arg_t *args, usize arg_count) {
+sigma_format_status sigma_snprint_args(char *buffer, usize capacity,
+                                       str_t format,
+                                       const sigma_fmt_arg_t *args,
+                                       usize arg_count) {
   if (buffer == NULL || capacity == 0)
-    return false;
+    return ERR(sigma_format_status, sigma_format_invalid_destination);
   buffer[0] = '\0';
   sigma_fixed_writer writer = sigma_fixed_writer_init((bytes_mut_t){
       .items = (u8 *)buffer,
       .len = capacity - 1,
   });
 
-  if (!sigma_format_args(sigma_fixed_writer_as_writer(&writer), format, args,
-                         arg_count))
-    return false;
+  (void)TRY(sigma_format_status,
+            sigma_format_args(sigma_fixed_writer_as_writer(&writer), format,
+                              args, arg_count));
   bytes_t written = sigma_fixed_writer_written(&writer);
   buffer[written.len] = '\0';
-  return true;
+  return OK(sigma_format_status, sigma_unit);
 }
 
 /** Performs the sigma asprint args operation. */
-bool sigma_asprint_args(string_t *out, allocator_t allocator, str_t format,
-                        const sigma_fmt_arg_t *args, usize arg_count) {
+sigma_format_status sigma_asprint_args(string_t *out, allocator_t allocator,
+                                       str_t format,
+                                       const sigma_fmt_arg_t *args,
+                                       usize arg_count) {
   if (out == NULL)
-    return false;
+    return ERR(sigma_format_status, sigma_format_invalid_destination);
   string_t result = string_init(allocator);
   sigma_string_writer writer = sigma_string_writer_init(&result);
 
-  if (!sigma_format_args(sigma_string_writer_as_writer(&writer), format, args,
-                         arg_count)) {
+  sigma_format_status status = sigma_format_args(
+      sigma_string_writer_as_writer(&writer), format, args, arg_count);
+  if (!status.ok) {
     string_deinit(&result);
-    return false;
+    return status;
   }
   *out = result;
-  return true;
+  return OK(sigma_format_status, sigma_unit);
 }
 
 /** Performs the sigma print args operation. */
-bool sigma_print_args(str_t format, const sigma_fmt_arg_t *args,
-                      usize arg_count) {
+sigma_format_status sigma_print_args(str_t format, const sigma_fmt_arg_t *args,
+                                     usize arg_count) {
   return sigma_fprint_args(STDOUT_FILENO, format, args, arg_count);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <sigma/qol.h>
+#include <sigma/attributes.h>
+#include <sigma/mem.h>
 
 #include <stdbool.h>
 
@@ -36,7 +37,7 @@ bool bytes_eq(bytes_t a, bytes_t b);
 
 /* Search */
 
-/* Returns the first matching offset, or SIGMA_NPOS when absent. */
-usize bytes_find(bytes_t bytes, u8 value);
-/* Returns the final matching offset, or SIGMA_NPOS when absent. */
-usize bytes_rfind(bytes_t bytes, u8 value);
+/* Returns the first matching offset, or None when absent. */
+SIGMA_NODISCARD sigma_offset bytes_find(bytes_t bytes, u8 value);
+/* Returns the final matching offset, or None when absent. */
+SIGMA_NODISCARD sigma_offset bytes_rfind(bytes_t bytes, u8 value);

@@ -46,46 +46,19 @@ SIGMA_X86_64_SYSCALL_ARITIES(X)
 #define SIGMA_LINUX_SYSCALL(argc, number, ...)                                 \
   SIGMA_SYS_CAT(SIGMA_LINUX_SYSCALL_, argc)(number, __VA_ARGS__)
 
+#define SIGMA_SYSCALL_RESULT(Type, raw, ...)                                   \
+  (linux_syscall_failed(raw)                                                   \
+       ? ERR(Type, (sigma_sys_error_t){.code = (i32) - (raw)})                 \
+       : OK(Type, __VA_ARGS__))
+
 #define SIGMA_RESULT_USIZE(type, raw)                                          \
-  do {                                                                         \
-    type sigma_result__;                                                       \
-    sigma_result__.ok = !linux_syscall_failed(raw);                            \
-    if (sigma_result__.ok)                                                     \
-      sigma_result__.value = (usize)(raw);                                     \
-    else                                                                       \
-      sigma_result__.error.code = (i32) - (raw);                               \
-    return sigma_result__;                                                     \
-  } while (false)
-
+  return SIGMA_SYSCALL_RESULT(type, raw, (usize)(raw))
 #define SIGMA_RESULT_POINTER(type, raw)                                        \
-  do {                                                                         \
-    type sigma_result__;                                                       \
-    sigma_result__.ok = !linux_syscall_failed(raw);                            \
-    if (sigma_result__.ok)                                                     \
-      sigma_result__.value = (void *)(raw);                                    \
-    else                                                                       \
-      sigma_result__.error.code = (i32) - (raw);                               \
-    return sigma_result__;                                                     \
-  } while (false)
-
+  return SIGMA_SYSCALL_RESULT(type, raw, (void *)(raw))
 #define SIGMA_RESULT_STATUS(type, raw)                                         \
-  do {                                                                         \
-    type sigma_result__;                                                       \
-    sigma_result__.ok = !linux_syscall_failed(raw);                            \
-    sigma_result__.error.code = sigma_result__.ok ? 0 : (i32) - (raw);         \
-    return sigma_result__;                                                     \
-  } while (false)
-
+  return SIGMA_SYSCALL_RESULT(type, raw, sigma_unit)
 #define SIGMA_RESULT_IPTR(type, raw)                                           \
-  do {                                                                         \
-    type sigma_result__;                                                       \
-    sigma_result__.ok = !linux_syscall_failed(raw);                            \
-    if (sigma_result__.ok)                                                     \
-      sigma_result__.value = (iptr)(raw);                                      \
-    else                                                                       \
-      sigma_result__.error.code = (i32) - (raw);                               \
-    return sigma_result__;                                                     \
-  } while (false)
+  return SIGMA_SYSCALL_RESULT(type, raw, (iptr)(raw))
 
 #define SIGMA_DEFINE_NORMAL(nr, name, argc, kind, type, policy, ...)           \
   type s_##name(SIGMA_SYS_DECLS(argc, __VA_ARGS__)) {                          \

@@ -11,6 +11,7 @@
 #include <sigma/printf.h>
 #include <sigma/qol.h>
 #include <sigma/reader.h>
+#include <sigma/result.h>
 #include <sigma/slice.h>
 #include <sigma/str.h>
 #include <sigma/string.h>

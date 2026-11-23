@@ -1,6 +1,7 @@
 #pragma once
 
 #include <allocator_vtable.h>
+#include <sigma/mem.h>
 #include <sigma/ownership.h>
 #include <sigma/qol.h>
 
@@ -11,7 +12,7 @@
  * Defines a vector for trivial or borrowed elements.
  *
  * Generated init creates an empty vector. reserve grows capacity without
- * changing length. push and pop copy elements. get returns NULL out of bounds.
+ * changing length. push and pop copy elements. get and pop return optionals.
  * clear and deinit never deinitialize individual elements. take transfers the
  * backing allocation and resets its source to {0}. Views borrow the vector
  * storage and remain valid only until growth, take, or deinit.
@@ -69,62 +70,61 @@
     return vec->len == 0;                                                      \
   }                                                                            \
                                                                                \
-  static inline T *Name##_get(Name *vec, usize index) {                        \
-    return index < vec->len ? &vec->items[index] : NULL;                       \
+  OPTIONAL(Name##_ref, T *);                                                   \
+  OPTIONAL(Name##_const_ref, const T *);                                       \
+  OPTIONAL(Name##_optional, T);                                                \
+                                                                               \
+  static inline Name##_ref Name##_get(Name *vec, usize index) {                \
+    return index < vec->len ? SOME(Name##_ref, &vec->items[index])             \
+                            : NONE(Name##_ref);                                \
   }                                                                            \
                                                                                \
-  static inline const T *Name##_get_const(const Name *vec, usize index) {      \
-    return index < vec->len ? &vec->items[index] : NULL;                       \
+  static inline Name##_const_ref Name##_get_const(const Name *vec,             \
+                                                  usize index) {               \
+    return index < vec->len ? SOME(Name##_const_ref, &vec->items[index])       \
+                            : NONE(Name##_const_ref);                          \
   }                                                                            \
-                                                                               \
-  static inline bool Name##_reserve(Name *vec, usize new_cap) {                \
+  static inline sigma_alloc_status Name##_reserve(Name *vec, usize new_cap) {  \
     if (new_cap <= vec->cap)                                                   \
-      return true;                                                             \
+      return OK(sigma_alloc_status, sigma_unit);                               \
                                                                                \
     if (new_cap > SIZE_MAX / sizeof(T))                                        \
-      return false;                                                            \
+      return ERR(sigma_alloc_status, sigma_alloc_size_overflow);               \
                                                                                \
     T *items = (T *)allocator_realloc_aligned_debug(                           \
         vec->allocator, vec->items, vec->cap * sizeof(T), new_cap * sizeof(T), \
         _Alignof(T), __FILE__, __func__, __LINE__);                            \
                                                                                \
     if (items == NULL)                                                         \
-      return false;                                                            \
+      return ERR(sigma_alloc_status, sigma_alloc_out_of_memory);               \
                                                                                \
     vec->items = items;                                                        \
     vec->cap = new_cap;                                                        \
-    return true;                                                               \
+    return OK(sigma_alloc_status, sigma_unit);                                 \
   }                                                                            \
                                                                                \
-  static inline bool Name##_push(Name *vec, T value) {                         \
+  static inline sigma_alloc_status Name##_push(Name *vec, T value) {           \
     if (vec->len == vec->cap) {                                                \
       usize new_cap = 8;                                                       \
                                                                                \
       if (vec->cap != 0) {                                                     \
         if (vec->cap > SIZE_MAX / 2)                                           \
-          return false;                                                        \
+          return ERR(sigma_alloc_status, sigma_alloc_size_overflow);           \
         new_cap = vec->cap * 2;                                                \
       }                                                                        \
                                                                                \
-      if (!Name##_reserve(vec, new_cap))                                       \
-        return false;                                                          \
+      (void)TRY(sigma_alloc_status, Name##_reserve(vec, new_cap));             \
     }                                                                          \
                                                                                \
     vec->items[vec->len++] = value;                                            \
-    return true;                                                               \
+    return OK(sigma_alloc_status, sigma_unit);                                 \
   }                                                                            \
                                                                                \
-  static inline bool Name##_pop(Name *vec, T *out) {                           \
+  static inline Name##_optional Name##_pop(Name *vec) {                        \
     if (vec->len == 0)                                                         \
-      return false;                                                            \
-                                                                               \
-    --vec->len;                                                                \
-    if (out != NULL)                                                           \
-      *out = vec->items[vec->len];                                             \
-                                                                               \
-    return true;                                                               \
+      return NONE(Name##_optional);                                            \
+    return SOME(Name##_optional, vec->items[--vec->len]);                      \
   }                                                                            \
-                                                                               \
   static inline void Name##_clear(Name *vec) { vec->len = 0; }
 
 /* Documents that generated elements are trivial values. */
@@ -156,48 +156,47 @@
     return (Name){.allocator = allocator};                                     \
   }                                                                            \
                                                                                \
-  static inline bool Name##_reserve(Name *vec, usize new_cap) {                \
+  static inline sigma_alloc_status Name##_reserve(Name *vec, usize new_cap) {  \
     if (new_cap <= vec->cap)                                                   \
-      return true;                                                             \
+      return OK(sigma_alloc_status, sigma_unit);                               \
                                                                                \
     if (new_cap > SIZE_MAX / sizeof(T))                                        \
-      return false;                                                            \
+      return ERR(sigma_alloc_status, sigma_alloc_size_overflow);               \
                                                                                \
     T *items = (T *)allocator_realloc_aligned_debug(                           \
         vec->allocator, vec->items, vec->cap * sizeof(T), new_cap * sizeof(T), \
         _Alignof(T), __FILE__, __func__, __LINE__);                            \
                                                                                \
     if (items == NULL)                                                         \
-      return false;                                                            \
+      return ERR(sigma_alloc_status, sigma_alloc_out_of_memory);               \
                                                                                \
     vec->items = items;                                                        \
     vec->cap = new_cap;                                                        \
-    return true;                                                               \
+    return OK(sigma_alloc_status, sigma_unit);                                 \
   }                                                                            \
                                                                                \
-  static inline bool Name##_ensure_push(Name *vec) {                           \
+  static inline sigma_alloc_status Name##_ensure_push(Name *vec) {             \
     if (vec->len < vec->cap)                                                   \
-      return true;                                                             \
+      return OK(sigma_alloc_status, sigma_unit);                               \
                                                                                \
     usize new_cap = 8;                                                         \
                                                                                \
     if (vec->cap != 0) {                                                       \
       if (vec->cap > SIZE_MAX / 2)                                             \
-        return false;                                                          \
+        return ERR(sigma_alloc_status, sigma_alloc_size_overflow);             \
       new_cap = vec->cap * 2;                                                  \
     }                                                                          \
                                                                                \
     return Name##_reserve(vec, new_cap);                                       \
   }                                                                            \
                                                                                \
-  static inline bool Name##_push_take(Name *vec, T *src) {                     \
-    if (!Name##_ensure_push(vec))                                              \
-      return false;                                                            \
+  static inline sigma_alloc_status Name##_push_take(Name *vec, T *src) {       \
+    (void)TRY(sigma_alloc_status, Name##_ensure_push(vec));                    \
                                                                                \
     SIGMA_MOVE_PTR(&vec->items[vec->len], src);                                \
     ++vec->len;                                                                \
                                                                                \
-    return true;                                                               \
+    return OK(sigma_alloc_status, sigma_unit);                                 \
   }                                                                            \
                                                                                \
   static inline bool Name##_pop_take(Name *vec, T *out) {                      \
@@ -230,7 +229,7 @@
   static inline bool Name##_clone(Name *out, const Name *src) {                \
     Name result = Name##_init(src->allocator);                                 \
                                                                                \
-    if (!Name##_reserve(&result, src->len))                                    \
+    if (!Name##_reserve(&result, src->len).ok)                                 \
       return false;                                                            \
                                                                                \
     for (usize i = 0; i < src->len; ++i) {                                     \

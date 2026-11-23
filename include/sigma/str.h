@@ -42,9 +42,10 @@ typedef struct {
 /* Creates a borrowed view over a NUL-terminated C string. */
 str_t str_from_cstr(const char *s);
 
-/* Allocates a NUL-terminated copy, or returns NULL on failure. */
-SIGMA_NODISCARD
-char *str_to_cstr(str_t s, allocator_t allocator);
+RESULT(sigma_cstr_result, char *, sigma_alloc_error);
+
+/* Allocates a NUL-terminated copy. */
+SIGMA_NODISCARD sigma_cstr_result str_to_cstr(str_t s, allocator_t allocator);
 
 /* Properties */
 
@@ -86,10 +87,10 @@ bool str_starts_with(str_t s, str_t prefix);
 
 /* Search */
 
-/* Returns the first matching byte offset, or SIGMA_NPOS when absent. */
-usize str_find_byte(str_t s, u8 byte);
-/* Returns the final matching byte offset, or SIGMA_NPOS when absent. */
-usize str_rfind_byte(str_t s, u8 byte);
+/* Returns the first matching byte offset, or None when absent. */
+SIGMA_NODISCARD sigma_offset str_find_byte(str_t s, u8 byte);
+/* Returns the final matching byte offset, or None when absent. */
+SIGMA_NODISCARD sigma_offset str_rfind_byte(str_t s, u8 byte);
 
 /* Trimming */
 
@@ -105,5 +106,8 @@ str_t str_trim_start_ascii(str_t s);
 /* Creates a scalar-delimiter iterator over s. */
 str_split_scalar_t str_split_scalar(str_t s, u8 delimiter);
 
-/* Writes the next borrowed field to out, preserving empty fields. */
-bool str_split_scalar_next(str_split_scalar_t *it, str_t *out);
+OPTIONAL(sigma_optional_str, str_t);
+
+/* Returns the next borrowed field, preserving empty fields. */
+SIGMA_NODISCARD sigma_optional_str
+str_split_scalar_next(str_split_scalar_t *it);
